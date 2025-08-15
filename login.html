@@ -8,12 +8,14 @@
     body {
         margin: 0;
         font-family: Arial, sans-serif;
-        height: 100vh;
+        min-height: 100vh;
         display: flex;
         justify-content: center;
         align-items: center;
         background: linear-gradient(120deg, #ff7e5f, #feb47b);
         animation: bgFade 8s infinite alternate ease-in-out;
+        padding: 10px; /* Prevents overflow on small screens */
+        box-sizing: border-box;
     }
 
     @keyframes bgFade {
@@ -23,14 +25,16 @@
 
     .container {
         position: relative;
-        width: 400px;
+        width: 100%;
+        max-width: 400px;
         background: rgba(255, 255, 255, 0.1);
         backdrop-filter: blur(15px);
-        padding: 30px;
+        padding: 30px 20px;
         border-radius: 15px;
         box-shadow: 0px 8px 25px rgba(0,0,0,0.2);
         color: white;
         animation: scaleUp 0.6s ease;
+        box-sizing: border-box;
     }
 
     @keyframes scaleUp {
@@ -42,6 +46,8 @@
         display: flex;
         justify-content: center;
         margin-bottom: 20px;
+        gap: 10px;
+        flex-wrap: wrap; /* Prevents overflow on small devices */
     }
 
     .switch-btn button {
@@ -53,6 +59,7 @@
         cursor: pointer;
         border-radius: 30px;
         transition: 0.3s;
+        font-size: 14px;
     }
 
     .switch-btn button.active {
@@ -64,6 +71,7 @@
     h2 {
         text-align: center;
         margin-bottom: 20px;
+        font-size: 20px;
     }
 
     .form-group {
@@ -72,12 +80,14 @@
 
     input {
         width: 100%;
-        padding: 10px;
+        padding: 12px;
         border: none;
         border-radius: 25px;
         outline: none;
         background: rgba(255,255,255,0.2);
         color: white;
+        font-size: 14px;
+        box-sizing: border-box;
     }
 
     input::placeholder {
@@ -86,13 +96,15 @@
 
     .btn {
         width: 100%;
-        padding: 10px;
+        padding: 12px;
         background: white;
         color: #2575fc;
         border: none;
         border-radius: 25px;
         cursor: pointer;
         font-weight: bold;
+        font-size: 14px;
+        transition: 0.3s;
     }
 
     .btn:hover {
@@ -103,7 +115,33 @@
     .hidden {
         display: none;
     }
+
+    /* ✅ Mobile optimization */
+    @media (max-width: 480px) {
+        body {
+            padding: 20px;
+        }
+
+        .container {
+            padding: 20px;
+        }
+
+        h2 {
+            font-size: 18px;
+        }
+
+        input, .btn {
+            font-size: 13px;
+            padding: 10px;
+        }
+
+        .switch-btn button {
+            font-size: 12px;
+            padding: 8px 15px;
+        }
+    }
 </style>
+
 </head>
 <body>
 
@@ -210,3 +248,4 @@
 
 </body>
 </html>
+
