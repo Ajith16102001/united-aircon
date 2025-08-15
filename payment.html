@@ -5,68 +5,116 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Payment Options</title>
 <style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
     body {
         font-family: Arial, sans-serif;
         background: linear-gradient(120deg, #1e3c72, #2a5298);
-        margin: 0;
-        padding: 0;
         display: flex;
         justify-content: center;
         align-items: center;
-        height: 100vh;
+        min-height: 100vh;
+        padding: 15px; /* Space for small screens */
     }
+
     .payment-container {
         background: rgba(255, 255, 255, 0.95);
-        padding: 25px;
+        padding: 20px;
         border-radius: 12px;
         box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-        max-width: 400px;
         width: 100%;
+        max-width: 400px;
         animation: fadeIn 0.5s ease-in-out;
     }
+
     h2 {
         text-align: center;
         color: #2a5298;
+        margin-bottom: 15px;
+        font-size: 1.5rem;
     }
+
     label {
         font-weight: bold;
         margin-top: 10px;
         display: block;
+        font-size: 0.95rem;
     }
+
     select, input {
         width: 100%;
-        padding: 8px;
+        padding: 10px;
         margin-top: 5px;
         border: 1px solid #ccc;
         border-radius: 6px;
-        box-sizing: border-box;
+        font-size: 1rem;
+        background: white;
     }
+
     .payment-option {
         margin-top: 15px;
     }
+
     .hidden {
         display: none;
     }
+
     button {
         margin-top: 15px;
         background: #2a5298;
         color: white;
         border: none;
-        padding: 10px;
+        padding: 12px;
         width: 100%;
         border-radius: 6px;
         cursor: pointer;
-        font-size: 16px;
-        transition: background 0.3s;
+        font-size: 1rem;
+        font-weight: bold;
+        transition: background 0.3s ease;
     }
+
     button:hover {
         background: #1e3c72;
     }
+
     @keyframes fadeIn {
         from { opacity: 0; transform: translateY(-10px); }
         to { opacity: 1; transform: translateY(0); }
     }
+
+    /* 📱 Mobile optimization */
+    @media (max-width: 500px) {
+        h2 {
+            font-size: 1.3rem;
+        }
+        label {
+            font-size: 0.9rem;
+        }
+        select, input, button {
+            font-size: 0.95rem;
+            padding: 10px;
+        }
+    }
+
+    /* 📱 Extra small devices */
+    @media (max-width: 350px) {
+        h2 {
+            font-size: 1.1rem;
+        }
+        label {
+            font-size: 0.85rem;
+        }
+        select, input, button {
+            font-size: 0.9rem;
+            padding: 8px;
+        }
+    }
 </style>
+
 </head>
 <body>
 
@@ -179,3 +227,4 @@
 
 </body>
 </html>
+
