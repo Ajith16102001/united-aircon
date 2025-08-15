@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Animated Stylish Login / Signup</title>
+<style>
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: linear-gradient(120deg, #ff7e5f, #feb47b);
+        animation: bgFade 8s infinite alternate ease-in-out;
+    }
+
+    @keyframes bgFade {
+        0% { background: linear-gradient(120deg, #ff7e5f, #feb47b); }
+        100% { background: linear-gradient(120deg, #6a11cb, #2575fc); }
+    }
+
+    .container {
+        position: relative;
+        width: 400px;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(15px);
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0px 8px 25px rgba(0,0,0,0.2);
+        color: white;
+        animation: scaleUp 0.6s ease;
+    }
+
+    @keyframes scaleUp {
+        from { transform: scale(0.8); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+    }
+
+    .switch-btn {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 20px;
+    }
+
+    .switch-btn button {
+        background: rgba(255,255,255,0.2);
+        border: none;
+        padding: 10px 20px;
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+        border-radius: 30px;
+        transition: 0.3s;
+    }
+
+    .switch-btn button.active {
+        background: #ffffff;
+        color: #2575fc;
+        box-shadow: 0 0 10px rgba(255,255,255,0.8);
+    }
+
+    h2 {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    input {
+        width: 100%;
+        padding: 10px;
+        border: none;
+        border-radius: 25px;
+        outline: none;
+        background: rgba(255,255,255,0.2);
+        color: white;
+    }
+
+    input::placeholder {
+        color: rgba(255,255,255,0.7);
+    }
+
+    .btn {
+        width: 100%;
+        padding: 10px;
+        background: white;
+        color: #2575fc;
+        border: none;
+        border-radius: 25px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    .btn:hover {
+        background: #ffdd57;
+        color: black;
+    }
+
+    .hidden {
+        display: none;
+    }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <div class="switch-btn">
+        <button id="loginBtn" class="active" onclick="showForm('login')">Login</button>
+        <button id="signupBtn" onclick="showForm('signup')">Signup</button>
+    </div>
+
+    <div id="loginForm">
+        <h2>Login</h2>
+        <div class="form-group">
+            <input type="text" id="loginUsername" placeholder="Username" required>
+        </div>
+        <div class="form-group">
+            <input type="password" id="loginPassword" placeholder="Password" required>
+        </div>
+        <button class="btn" onclick="loginUser()">Login</button>
+    </div>
+
+    <div id="signupForm" class="hidden">
+        <h2>Signup</h2>
+        <div class="form-group">
+            <input type="text" id="signupName" placeholder="Full Name" required>
+        </div>
+        <div class="form-group">
+            <input type="email" id="signupEmail" placeholder="Email" required>
+        </div>
+        <div class="form-group">
+            <input type="text" id="signupUsername" placeholder="Username" required>
+        </div>
+        <div class="form-group">
+            <input type="password" id="signupPassword" placeholder="Password" required>
+        </div>
+        <div class="form-group">
+            <input type="password" id="signupConfirmPassword" placeholder="Confirm Password" required>
+        </div>
+        <button class="btn" onclick="signupUser()">Signup</button>
+    </div>
+</div>
+
+<script>
+    let registeredUser = null;
+
+    function showForm(form) {
+        document.getElementById('loginForm').classList.toggle('hidden', form !== 'login');
+        document.getElementById('signupForm').classList.toggle('hidden', form !== 'signup');
+        document.getElementById('loginBtn').classList.toggle('active', form === 'login');
+        document.getElementById('signupBtn').classList.toggle('active', form === 'signup');
+    }
+
+    function signupUser() {
+        const name = document.getElementById('signupName').value.trim();
+        const email = document.getElementById('signupEmail').value.trim();
+        const username = document.getElementById('signupUsername').value.trim();
+        const password = document.getElementById('signupPassword').value.trim();
+        const confirmPassword = document.getElementById('signupConfirmPassword').value.trim();
+
+        // Name validation
+        if (!/^[A-Za-z\s]+$/.test(name)) {
+            alert("Name must contain only letters.");
+            return;
+        }
+        // Email validation
+        if (!/^\S+@\S+\.\S+$/.test(email)) {
+            alert("Please enter a valid email address.");
+            return;
+        }
+        // Required fields
+        if (!name || !email || !username || !password || !confirmPassword) {
+            alert("All fields are required.");
+            return;
+        }
+        // Password match
+        if (password !== confirmPassword) {
+            alert("Passwords do not match.");
+            return;
+        }
+
+        // Save user
+        registeredUser = { username, password };
+        alert("Successfully signed up! Now you can login.");
+        showForm('login');
+    }
+
+    function loginUser() {
+        const username = document.getElementById('loginUsername').value.trim();
+        const password = document.getElementById('loginPassword').value.trim();
+
+        if (!registeredUser) {
+            alert("Please signup first!");
+            return;
+        }
+       if (username === registeredUser.username && password === registeredUser.password) {
+    if (confirm("Login successful! Please enter your details to proceed with shipping your products.")) {
+        window.location.href = "shipping.html"; // Change to your shipping details page
+    }
+} else {
+    alert("Invalid username or password.");
+}
+
+    }
+</script>
+
+</body>
+</html>

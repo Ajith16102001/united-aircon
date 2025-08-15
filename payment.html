@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Payment Options</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: linear-gradient(120deg, #1e3c72, #2a5298);
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
+    .payment-container {
+        background: rgba(255, 255, 255, 0.95);
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        max-width: 400px;
+        width: 100%;
+        animation: fadeIn 0.5s ease-in-out;
+    }
+    h2 {
+        text-align: center;
+        color: #2a5298;
+    }
+    label {
+        font-weight: bold;
+        margin-top: 10px;
+        display: block;
+    }
+    select, input {
+        width: 100%;
+        padding: 8px;
+        margin-top: 5px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        box-sizing: border-box;
+    }
+    .payment-option {
+        margin-top: 15px;
+    }
+    .hidden {
+        display: none;
+    }
+    button {
+        margin-top: 15px;
+        background: #2a5298;
+        color: white;
+        border: none;
+        padding: 10px;
+        width: 100%;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background 0.3s;
+    }
+    button:hover {
+        background: #1e3c72;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+</head>
+<body>
+
+<div class="payment-container">
+    <h2>Choose Payment Method</h2>
+
+    <div class="payment-option">
+        <label><input type="radio" name="payment" value="upi"> UPI</label>
+        <div id="upiSection" class="hidden">
+            <label>Enter UPI ID</label>
+            <input type="text" id="upiId" placeholder="example@upi">
+        </div>
+    </div>
+
+    <div class="payment-option">
+        <label><input type="radio" name="payment" value="netbanking"> Net Banking</label>
+        <div id="netBankingSection" class="hidden">
+            <label>Select Bank</label>
+            <select id="bankName">
+                <option value="">-- Select Bank --</option>
+                <option value="SBI">State Bank of India</option>
+                <option value="HDFC">HDFC Bank</option>
+                <option value="ICICI">ICICI Bank</option>
+                <option value="AXIS">Axis Bank</option>
+                <option value="PNB">Punjab National Bank</option>
+            </select>
+            <label>Account Number</label>
+            <input type="text" id="accountNumber" placeholder="Enter Account Number">
+            <label>IFSC Code</label>
+            <input type="text" id="ifscCode" placeholder="Enter IFSC Code">
+        </div>
+    </div>
+
+    <div class="payment-option">
+        <label><input type="radio" name="payment" value="card"> Credit/Debit Card</label>
+        <div id="cardSection" class="hidden">
+            <label>Card Number</label>
+            <input type="text" id="cardNumber" placeholder="XXXX XXXX XXXX XXXX">
+            <label>Expiry Date</label>
+            <input type="month" id="expiryDate">
+            <label>CVV</label>
+            <input type="password" id="cvv" maxlength="3" placeholder="123">
+        </div>
+    </div>
+
+    <div class="payment-option">
+        <label><input type="radio" name="payment" value="cod"> Cash on Delivery (Extra ₹10)</label>
+    </div>
+
+    <button onclick="processPayment()">Proceed to Pay</button>
+</div>
+
+<script>
+    const upiSection = document.getElementById("upiSection");
+    const netBankingSection = document.getElementById("netBankingSection");
+    const cardSection = document.getElementById("cardSection");
+
+    document.querySelectorAll('input[name="payment"]').forEach(option => {
+        option.addEventListener("change", function() {
+            upiSection.classList.add("hidden");
+            netBankingSection.classList.add("hidden");
+            cardSection.classList.add("hidden");
+
+            if (this.value === "upi") upiSection.classList.remove("hidden");
+            else if (this.value === "netbanking") netBankingSection.classList.remove("hidden");
+            else if (this.value === "card") cardSection.classList.remove("hidden");
+        });
+    });
+
+    function processPayment() {
+        const selectedPayment = document.querySelector('input[name="payment"]:checked');
+        if (!selectedPayment) {
+            alert("Please select a payment method.");
+            return;
+        }
+
+        let valid = true;
+        if (selectedPayment.value === "upi") {
+            const upiId = document.getElementById("upiId").value.trim();
+            if (!upiId.includes("@")) {
+                alert("Please enter a valid UPI ID.");
+                valid = false;
+            }
+        }
+        else if (selectedPayment.value === "netbanking") {
+            const bankName = document.getElementById("bankName").value;
+            const accountNumber = document.getElementById("accountNumber").value.trim();
+            const ifscCode = document.getElementById("ifscCode").value.trim();
+            if (!bankName || accountNumber.length < 8 || ifscCode.length !== 11) {
+                alert("Please enter valid Net Banking details.");
+                valid = false;
+            }
+        }
+        else if (selectedPayment.value === "card") {
+            const cardNumber = document.getElementById("cardNumber").value.replace(/\s/g, '');
+            const expiryDate = document.getElementById("expiryDate").value;
+            const cvv = document.getElementById("cvv").value;
+            if (cardNumber.length !== 16 || !expiryDate || cvv.length !== 3) {
+                alert("Please enter valid Card details.");
+                valid = false;
+            }
+        }
+        if (valid) {
+    alert("Payment successful! Click OK to view your order summary.");
+    window.location.href = "summary.html"; // Redirect to summary page
+}
+
+    }
+</script>
+
+</body>
+</html>

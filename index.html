@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CoolAir - AC Sales & Service</title>
+<style>
+    * {margin: 0; padding: 0; box-sizing: border-box;}
+    body {font-family: Arial, sans-serif; line-height: 1.6; color: #333; background: #f5f5f5;}
+    
+    header {background: #0077b6; color: #fff; padding: 1rem 0; text-align: center;}
+    
+    /* Navigation */
+    nav {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        background: #023e8a;
+    }
+    nav a {
+        color: #fff;
+        text-decoration: none;
+        padding: 10px 15px;
+    }
+    nav a:hover {
+        background: #0077b6;
+        border-radius: 5px;
+    }
+
+    /* Hamburger Icon */
+    .menu-toggle {
+        display: none;
+        flex-direction: column;
+        cursor: pointer;
+        position: absolute;
+        top: 15px;
+        right: 20px;
+    }
+    .menu-toggle div {
+        width: 25px;
+        height: 3px;
+        background: white;
+        margin: 4px 0;
+    }
+
+    section {padding: 40px 20px; max-width: 1200px; margin: auto;}
+    h2 {margin-bottom: 20px; color: #023e8a;}
+    
+    .services, .gallery, .reviews {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+    }
+    
+    .card {
+        background: #f9f9f9;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .card img {width: 100%; border-radius: 8px;}
+    
+    form {
+        display: grid;
+        gap: 8px;
+        max-width: 500px;
+        margin: auto;
+    }
+    
+    input, textarea, select, button {
+        padding: 10px;
+        font-size: 1rem;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+    
+    small {font-size: 0.9rem;}
+    
+    button {
+        background: #0077b6;
+        color: #fff;
+        border: none;
+        cursor: pointer;
+        margin-top: 5px;
+    }
+    button:hover {background: #023e8a;}
+    
+    .map {width: 100%; height: 300px; border: none;}
+    
+    footer {background: #023e8a; color: #fff; text-align: center; padding: 15px;}
+    
+    .contact-links a {
+        display: inline-block;
+        margin: 5px;
+        padding: 10px 15px;
+        background: #0077b6;
+        color: #fff;
+        border-radius: 5px;
+        text-decoration: none;
+    }
+    .contact-links a:hover {background: #0096c7;}
+    
+    /* Reviews Section */
+    .reviews-section {
+        max-width: 800px;
+        margin: auto;
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+    .review {
+        display: none;
+        text-align: center;
+        animation: fade 1s ease-in-out;
+    }
+    .review.active {display: block;}
+    
+    .stars {
+        color: gold;
+        margin-bottom: 10px;
+        font-size: 20px;
+    }
+    .review p {
+        font-size: 16px;
+        line-height: 1.5;
+        color: #333;
+    }
+    .review h4 {margin-top: 10px; color: #0077b6;}
+    
+    @keyframes fade {
+        from {opacity: 0;}
+        to {opacity: 1;}
+    }
+    
+    /* Custom Padding Fix */
+    .custo {padding-left: 260px;}
+    .before {padding-left: 490px;}
+    
+    /* Gallery Section Hover Effect */
+    .gallery .card {
+        overflow: hidden;
+        border-radius: 8px;
+        background: #fff;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .gallery .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+    }
+    .gallery .card img {
+        width: 100%;
+        height: auto;
+        border-radius: 8px;
+        transition: transform 0.5s ease;
+    }
+    .gallery .card:hover img {
+        transform: scale(1.0);
+    }
+	
+	.services .card img {
+        width: 100%;
+        height: 180px;
+        object-fit: cover;
+        border-radius: 8px 8px 0 0;
+        margin-bottom: 10px;
+        transition: transform 0.5s ease;
+    }
+
+    .services .card:hover img {
+        transform: scale(1.05);
+    }
+
+    /* 📱 Mobile Responsive Fixes */
+    @media (max-width: 768px) {
+        nav {
+            flex-direction: column;
+            align-items: center;
+            display: none; /* hidden by default on mobile */
+        }
+        nav.active {
+            display: flex; /* show when menu toggle clicked */
+        }
+        .menu-toggle {
+            display: flex;
+        }
+        section {padding: 20px 10px;}
+        .custo, .before {padding-left: 0;}
+        .reviews-section {padding: 15px;}
+    }
+
+    @media (max-width: 500px) {
+        h2 {font-size: 1.4rem;}
+        .card {padding: 15px;}
+        input, textarea, select, button {font-size: 1rem;}
+        .stars {font-size: 18px;}
+        .review p {font-size: 14px;}
+    }
+	
+</style>
+
+
+</head>
+<body>
+
+<header>
+  <h1>UNITED AIRCON - AC Sales & Service</h1>
+  <p>Keeping You Cool & Comfortable</p>
+  <div class="menu-toggle" onclick="document.querySelector('nav').classList.toggle('active')">
+    <div></div>
+    <div></div>
+    <div></div>
+  </div>
+</header>
+
+<nav>
+  <a href="#home">Home</a>
+  <a href="#" id="productsLink">Products</a>
+
+  <a href="#services">Services</a>
+  <a href="#book">Book Service</a>
+  <a href="#areas">Service Areas</a>
+  <a href="#contact">Contact</a>
+  <a href="#customer reviews">Reviews</a>
+  <a href="#gallery">Gallery</a>
+</nav>
+
+<section id="home">
+  <h2>Welcome to UNITED AIRCON</h2>
+  <p>We provide top-notch AC sales, repair, and maintenance services to keep your home and office cool all year round.</p>
+</section>
+
+<section id="services">
+  <h2>Our Services & Pricing</h2>
+  <div class="services">
+  
+    <div class="card">
+      <img src="./pictures/sales1.jpg" alt="AC Sales">
+      <h3>AC Sales</h3>
+      <p>Starting from ₹25,000</p>
+    </div>
+    
+    <div class="card">
+      <img src="./pictures/service1.jpg" alt="AC Repair">
+      <h3>AC Repair</h3>
+      <p>Starting from ₹500</p>
+    </div>
+    
+    <div class="card">
+      <img src="./pictures/maintain1.jpg" alt="AC Maintenance">
+      <h3>AC Maintenance</h3>
+      <p>Starting from ₹800</p>
+    </div>
+    
+  </div>
+</section>
+
+
+<section id="book">
+  <h2>Book a Service</h2>
+  <form id="serviceForm">
+    <input type="text" id="name" placeholder="Your Name" required>
+    <small id="nameError" style="color:red;"></small>
+
+    <input type="tel" id="phone" placeholder="Phone Number" required>
+    <small id="phoneError" style="color:red;"></small>
+
+    <select id="service" required>
+      <option value="">Select Service</option>
+      <option value="sales">AC Sales</option>
+      <option value="repair">AC Repair</option>
+      <option value="maintenance">AC Maintenance</option>
+    </select>
+    <small id="serviceError" style="color:red;"></small>
+
+    <textarea id="address" placeholder="Address" required></textarea>
+    <small id="addressError" style="color:red;"></small>
+
+    <button type="submit">Book Now</button>
+    <p id="successMessage" style="color:green; font-weight:bold; margin-top:10px;"></p>
+  </form>
+</section>
+
+
+<section id="areas">
+  <h2>Our Service Areas</h2>
+  <iframe src="https://www.google.com/maps/embed?pb=!4v1755235797397!6m8!1m7!1sMWasiuMlXe2NUMiIfetnHw!2m2!1d12.00476916319959!2d79.5828186810505!3f228.2478861454193!4f-9.435748956314441!5f0.7820865974627469" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+    
+  </iframe>
+</section>
+
+
+
+<section id="contact">
+  <h2>Contact Us</h2>
+  <div class="contact-links">
+    <a href="tel:+91 6374383135,">📞 Call Us</a>
+    <a href="https://wa.me/911234567890" target="_blank">💬 WhatsApp</a>
+  </div>
+</section>
+
+
+<div class="reviews-section">
+    <h2 class="custo">Customer Reviews</h2>
+    <div class="review active">
+        <div class="stars">★★★★★</div>
+        <p>"Excellent service! My AC is working perfectly now. Highly recommended!"</p>
+        <h4>- obito uchiha</h4>
+    </div>
+    <div class="review">
+        <div class="stars">★★★★☆</div>
+        <p>"Quick response and professional technicians. Very satisfied with the work."</p>
+        <h4>- madara uchiha</h4>
+    </div>
+    <div class="review">
+        <div class="stars">★★★★★</div>
+        <p>"Affordable prices and great customer service. Will call them again next summer!"</p>
+        <h4>- shisui uchiha</h4>
+    </div>
+	<div class="review">
+        <div class="stars">★★★★☆</div>
+        <p>"Quick response and professional technicians. Very satisfied with the work."</p>
+        <h4>- Itachi uchiha</h4>
+    </div>
+	<div class="review">
+        <div class="stars">★★★★☆</div>
+        <p>"Quick response and professional technicians. Very satisfied with the work."</p>
+        <h4>- sasuke uchiha</h4>
+    </div>
+</div>
+
+
+<section id="gallery">
+  <h2 class="before">Before & After</h2>
+  
+  <div class="gallery">
+    <div class="card"><img src="./pictures/before1.jpg" alt="Before Service"></div>
+    <div class="card"><img src="./pictures/after1.jpg" alt="After Service"></div>
+  </div>
+</section>
+
+<footer>
+  <p>&copy; 2025 CoolAir. All rights reserved.</p>
+</footer>
+
+<script>
+document.getElementById('serviceForm').addEventListener('submit', function(e){
+    e.preventDefault();
+
+    // Get values
+    let name = document.getElementById('name').value.trim();
+    let phone = document.getElementById('phone').value.trim();
+    let service = document.getElementById('service').value;
+    let address = document.getElementById('address').value.trim();
+
+    // Error message elements
+    let nameError = document.getElementById('nameError');
+    let phoneError = document.getElementById('phoneError');
+    let serviceError = document.getElementById('serviceError');
+    let addressError = document.getElementById('addressError');
+    let successMessage = document.getElementById('successMessage');
+
+    // Clear previous messages
+    nameError.textContent = "";
+    phoneError.textContent = "";
+    serviceError.textContent = "";
+    addressError.textContent = "";
+    successMessage.textContent = "";
+
+    let isValid = true;
+
+    // Name validation
+    let namePattern = /^[A-Za-z\s]+$/;
+    if (!namePattern.test(name)) {
+        nameError.textContent = "Name should contain only letters.";
+        isValid = false;
+    }
+
+    // Phone validation
+    let phonePattern = /^\d{10}$/;
+    if (!phonePattern.test(phone)) {
+        phoneError.textContent = "Phone number must be exactly 10 digits.";
+        isValid = false;
+    }
+
+    // Service validation
+    if (service === "") {
+        serviceError.textContent = "Please select a service.";
+        isValid = false;
+    }
+
+    // Address validation
+    if (address.length < 5) {
+        addressError.textContent = "Please enter a valid address.";
+        isValid = false;
+    }
+
+    // If all valid
+    if (isValid) {
+        successMessage.textContent = "✅ Your booking was successful! Our team will contact you immediately.";
+        this.reset();
+    }
+});
+
+ let reviews = document.querySelectorAll('.review');
+    let index = 0;
+
+    function showNextReview() {
+        reviews[index].classList.remove('active');
+        index = (index + 1) % reviews.length;
+        reviews[index].classList.add('active');
+    }
+
+    setInterval(showNextReview, 3000); // Change every 3 seconds
+	
+	document.getElementById('productsLink').addEventListener('click', function(e) {
+    e.preventDefault(); // Stop default link behavior
+    window.location.href = 'products.html'; // Redirect to products page
+});
+
+
+</script>
+
+</body>
+</html>

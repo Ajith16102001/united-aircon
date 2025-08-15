@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Order Summary - AC Store</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: linear-gradient(120deg, #00c6ff, #0072ff);
+        margin: 0;
+        padding: 0;
+        color: #fff;
+    }
+    .container {
+        max-width: 800px;
+        margin: 30px auto;
+        background: rgba(0,0,0,0.6);
+        padding: 20px;
+        border-radius: 10px;
+    }
+    h2 {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+    table, th, td {
+        border: 1px solid #fff;
+    }
+    th, td {
+        padding: 10px;
+        text-align: center;
+    }
+    .total {
+        font-size: 18px;
+        font-weight: bold;
+    }
+    .message {
+        background: #28a745;
+        padding: 10px;
+        text-align: center;
+        border-radius: 5px;
+        margin-bottom: 15px;
+    }
+    .btn-home {
+        display: block;
+        width: 200px;
+        margin: 0 auto;
+        padding: 10px;
+        background: #ff9800;
+        color: white;
+        text-align: center;
+        font-size: 16px;
+        border-radius: 5px;
+        text-decoration: none;
+        transition: background 0.3s ease;
+    }
+    .btn-home:hover {
+        background: #e68900;
+    }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Order Summary</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Item Name</th>
+                <th>Price (₹)</th>
+                <th>Quantity</th>
+                <th>Total (₹)</th>
+            </tr>
+        </thead>
+        <tbody id="cartItems"></tbody>
+    </table>
+    <p class="total" id="totalAmount"></p>
+    <p class="total" id="paymentType"></p>
+    <div class="message">You can view and track your order anytime.</div>
+    
+    <!-- Back to Home Button -->
+    <a href="service.html" class="btn-home">⬅ Back to Home</a>
+</div>
+
+<script>
+    // Fetch cart data and payment type from localStorage
+    const cart = JSON.parse(localStorage.getItem("cart")) || [];
+    const paymentType = localStorage.getItem("paymentType") || "Not Selected";
+    
+    let cartTable = document.getElementById("cartItems");
+    let total = 0;
+
+    cart.forEach(item => {
+        let itemTotal = item.price * item.quantity;
+        total += itemTotal;
+        cartTable.innerHTML += `
+            <tr>
+                <td>${item.name}</td>
+                <td>${item.price}</td>
+                <td>${item.quantity}</td>
+                <td>${itemTotal}</td>
+            </tr>
+        `;
+    });
+
+    // Add COD charge if applicable
+    if (paymentType === "Cash on Delivery") {
+        total += 10;
+    }
+
+    document.getElementById("totalAmount").innerText = `Final Amount: ₹${total}`;
+    document.getElementById("paymentType").innerText = `Payment Type: ${paymentType}`;
+</script>
+
+</body>
+</html>
