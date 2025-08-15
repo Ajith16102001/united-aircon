@@ -5,62 +5,111 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Order Summary - AC Store</title>
 <style>
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
     body {
         font-family: Arial, sans-serif;
         background: linear-gradient(120deg, #00c6ff, #0072ff);
-        margin: 0;
-        padding: 0;
         color: #fff;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        padding: 15px;
     }
+
     .container {
+        width: 100%;
         max-width: 800px;
-        margin: 30px auto;
-        background: rgba(0,0,0,0.6);
+        background: rgba(0, 0, 0, 0.6);
         padding: 20px;
         border-radius: 10px;
     }
+
     h2 {
         text-align: center;
         margin-bottom: 20px;
+        font-size: 1.8rem;
     }
+
+    .table-wrapper {
+        overflow-x: auto;
+    }
+
     table {
         width: 100%;
         border-collapse: collapse;
-        margin-bottom: 20px;
+        min-width: 500px; /* Prevent table breaking on small screens */
     }
+
     table, th, td {
         border: 1px solid #fff;
     }
+
     th, td {
         padding: 10px;
         text-align: center;
+        font-size: 1rem;
     }
+
     .total {
-        font-size: 18px;
+        font-size: 1.1rem;
         font-weight: bold;
+        margin-top: 10px;
     }
+
     .message {
         background: #28a745;
         padding: 10px;
         text-align: center;
         border-radius: 5px;
-        margin-bottom: 15px;
+        margin: 15px 0;
+        font-size: 0.95rem;
     }
+
     .btn-home {
         display: block;
-        width: 200px;
+        max-width: 250px;
         margin: 0 auto;
-        padding: 10px;
+        padding: 12px;
         background: #ff9800;
         color: white;
         text-align: center;
-        font-size: 16px;
+        font-size: 1rem;
         border-radius: 5px;
         text-decoration: none;
+        font-weight: bold;
         transition: background 0.3s ease;
     }
+
     .btn-home:hover {
         background: #e68900;
+    }
+
+    /* Mobile Styles */
+    @media (max-width: 600px) {
+        .container {
+            padding: 15px;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+        }
+
+        th, td {
+            padding: 8px;
+            font-size: 0.9rem;
+        }
+
+        .btn-home {
+            width: 100%;
+            max-width: none;
+            font-size: 1rem;
+        }
     }
 </style>
 </head>
@@ -68,17 +117,20 @@
 
 <div class="container">
     <h2>Order Summary</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Item Name</th>
-                <th>Price (₹)</th>
-                <th>Quantity</th>
-                <th>Total (₹)</th>
-            </tr>
-        </thead>
-        <tbody id="cartItems"></tbody>
-    </table>
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Item Name</th>
+                    <th>Price (₹)</th>
+                    <th>Quantity</th>
+                    <th>Total (₹)</th>
+                </tr>
+            </thead>
+            <tbody id="cartItems"></tbody>
+        </table>
+    </div>
+
     <p class="total" id="totalAmount"></p>
     <p class="total" id="paymentType"></p>
     <div class="message">You can view and track your order anytime.</div>
@@ -88,7 +140,6 @@
 </div>
 
 <script>
-    // Fetch cart data and payment type from localStorage
     const cart = JSON.parse(localStorage.getItem("cart")) || [];
     const paymentType = localStorage.getItem("paymentType") || "Not Selected";
     
@@ -108,7 +159,6 @@
         `;
     });
 
-    // Add COD charge if applicable
     if (paymentType === "Cash on Delivery") {
         total += 10;
     }
@@ -119,5 +169,3 @@
 
 </body>
 </html>
-
-
