@@ -1,121 +1,137 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Order Summary - AC Store</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Order Summary</title>
 <style>
-    body {
-        font-family: Arial, sans-serif;
-        background: linear-gradient(120deg, #00c6ff, #0072ff);
-        margin: 0;
-        padding: 0;
-        color: #fff;
-    }
-    .container {
-        max-width: 800px;
-        margin: 30px auto;
-        background: rgba(0,0,0,0.6);
-        padding: 20px;
-        border-radius: 10px;
-    }
-    h2 {
-        text-align: center;
-        margin-bottom: 20px;
-    }
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-bottom: 20px;
-    }
-    table, th, td {
-        border: 1px solid #fff;
-    }
-    th, td {
-        padding: 10px;
-        text-align: center;
-    }
-    .total {
-        font-size: 18px;
-        font-weight: bold;
-    }
-    .message {
-        background: #28a745;
-        padding: 10px;
-        text-align: center;
-        border-radius: 5px;
-        margin-bottom: 15px;
-    }
-    .btn-home {
-        display: block;
-        width: 200px;
-        margin: 0 auto;
-        padding: 10px;
-        background: #ff9800;
-        color: white;
-        text-align: center;
-        font-size: 16px;
-        border-radius: 5px;
-        text-decoration: none;
-        transition: background 0.3s ease;
-    }
-    .btn-home:hover {
-        background: #e68900;
-    }
+  body{font-family:Arial,sans-serif;background:#f3f4f6;color:#111;margin:0;padding:0}
+  .container{max-width:800px;margin:40px auto;padding:20px;background:#fff;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.1)}
+  h1{text-align:center;margin-bottom:20px}
+  .section{margin-bottom:20px}
+  .section h2{font-size:18px;margin-bottom:8px;border-bottom:1px solid #ddd;padding-bottom:4px}
+  .item{display:flex;justify-content:space-between;margin-bottom:8px;padding-bottom:4px;border-bottom:1px dashed #ddd}
+  .item-name{font-weight:600}
+  .muted{color:#555;font-size:12px}
+  .totals{text-align:right;margin-top:10px}
+  .totals div{margin-bottom:4px;font-weight:600}
+  #serverNote{color:red;text-align:center;margin-top:12px;font-weight:600}
+  button{padding:10px 20px;background:#34d399;color:#04211a;border:none;border-radius:6px;cursor:pointer;margin-top:10px}
 </style>
 </head>
 <body>
-
 <div class="container">
-    <h2>Order Summary</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Item Name</th>
-                <th>Price (₹)</th>
-                <th>Quantity</th>
-                <th>Total (₹)</th>
-            </tr>
-        </thead>
-        <tbody id="cartItems"></tbody>
-    </table>
-    <p class="total" id="totalAmount"></p>
-    <p class="total" id="paymentType"></p>
-    <div class="message">You can view and track your order anytime.</div>
-    
-    <!-- Back to Home Button -->
-    <a href="index.html" class="btn-home">⬅ Back to Home</a>
+  <h1>Order Summary</h1>
+
+  <div class="section" id="customerSection">
+    <h2>Customer Info</h2>
+    <div id="customer"></div>
+  </div>
+
+  <div class="section" id="shippingSection">
+    <h2>Shipping Info</h2>
+    <div id="shipping"></div>
+  </div>
+
+  <div class="section" id="paymentSection">
+    <h2>Payment Method</h2>
+    <div id="paymentMethod"></div>
+  </div>
+
+  <div class="section" id="itemsSection">
+    <h2>Ordered Items</h2>
+    <div id="itemsContainer"></div>
+  </div>
+
+  <div class="totals">
+    <div>Subtotal: <span id="sub">₹0.00</span></div>
+    <div>Shipping: <span id="ship">₹0.00</span></div>
+    <div>Tax (18% GST): <span id="tax">₹0.00</span></div>
+    <div>Grand Total: <span id="grand">₹0.00</span></div>
+  </div>
+
+  <div id="serverNote"></div>
+  <div style="text-align:center;">
+    <button id="backShop">Back to Shop</button>
+    <button id="finishBtn">Finish</button>
+  </div>
 </div>
 
 <script>
-    // Fetch cart data and payment type from localStorage
-    const cart = JSON.parse(localStorage.getItem("cart")) || [];
-    const paymentType = localStorage.getItem("paymentType") || "Not Selected";
-    
-    let cartTable = document.getElementById("cartItems");
-    let total = 0;
+function formatRupee(n){ 
+  return '₹' + Number(n).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
 
-    cart.forEach(item => {
-        let itemTotal = item.price * item.quantity;
-        total += itemTotal;
-        cartTable.innerHTML += `
-            <tr>
-                <td>${item.name}</td>
-                <td>${item.price}</td>
-                <td>${item.quantity}</td>
-                <td>${itemTotal}</td>
-            </tr>
-        `;
+function loadSummary(){
+  const serverNote = document.getElementById('serverNote');
+  try{
+    const cart = JSON.parse(sessionStorage.getItem('cartItems')||'[]');
+    const user = JSON.parse(sessionStorage.getItem('auth')||'{}');
+    const shipping = JSON.parse(sessionStorage.getItem('shippingInfo')||'{}');
+    const payment = JSON.parse(sessionStorage.getItem('paymentInfo')||'{}');
+
+    if(!user.userId){ serverNote.textContent='⚠️ User not logged in'; return; }
+    if(!cart.length){ serverNote.textContent='⚠️ Cart is empty'; return; }
+
+    // Totals
+    let subtotal = 0;
+    cart.forEach(it => subtotal += Number(it.price||0)*Number(it.qty||1));
+    const shippingCharge = 200;
+    const tax = subtotal*0.18;
+    const grand = subtotal + shippingCharge + tax;
+
+    // Render customer
+    const c = user;
+    document.getElementById('customer').innerHTML = `<strong>${c.username}</strong> ${c.email? '• '+c.email : ''}`;
+
+    // Render shipping
+    const s = shipping;
+    document.getElementById('shipping').innerHTML = `${s.name||''}${s.phone? ' • '+s.phone:''}<br>${s.address||''}${s.city? ', '+s.city:''}${s.state? ', '+s.state:''}${s.pincode? ' - '+s.pincode:''}`;
+
+    // Render payment
+    const p = payment;
+    document.getElementById('paymentMethod').innerHTML = `<strong>${p.method||'Cash on Delivery'}</strong>`;
+
+    // Render items
+    const container = document.getElementById('itemsContainer'); container.innerHTML='';
+    cart.forEach(it=>{
+      const qty = Number(it.qty||1), line = Number(it.price||0)*qty;
+      const div = document.createElement('div'); div.className='item';
+      div.innerHTML=`<div>
+        <div class="item-name">${it.name}</div>
+        <div class="muted">${it.brand||''} ${it.ton? '• '+it.ton : ''}</div>
+      </div>
+      <div style="text-align:right">
+        <div>${qty} × ${formatRupee(it.price)}</div>
+        <div>${formatRupee(line)}</div>
+      </div>`;
+      container.appendChild(div);
     });
 
-    // Add COD charge if applicable
-    if (paymentType === "Cash on Delivery") {
-        total += 10;
-    }
+    // Totals
+    document.getElementById('sub').textContent=formatRupee(subtotal);
+    document.getElementById('ship').textContent=formatRupee(shippingCharge);
+    document.getElementById('tax').textContent=formatRupee(tax);
+    document.getElementById('grand').textContent=formatRupee(grand);
 
-    document.getElementById("totalAmount").innerText = `Final Amount: ₹${total}`;
-    document.getElementById("paymentType").innerText = `Payment Type: ${paymentType}`;
+  } catch(err){
+    console.error(err);
+    serverNote.textContent='⚠️ Error loading summary';
+  }
+}
+
+// --- Buttons ---
+document.getElementById('backShop').addEventListener('click',()=>location.href='products.html');
+document.getElementById('finishBtn').addEventListener('click',()=>{
+  sessionStorage.removeItem('cartItems');
+  sessionStorage.removeItem('shippingInfo');
+  sessionStorage.removeItem('paymentInfo');
+  sessionStorage.removeItem('orderId');
+  location.href='products.html';
+});
+
+// Init
+loadSummary();
 </script>
-
 </body>
 </html>
