@@ -1,167 +1,128 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Shipping Details</title>
 <style>
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
-
-    body {
-        font-family: Arial, sans-serif;
-        background: linear-gradient(120deg, #00c6ff, #0072ff);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-        padding: 15px; /* Space around form for small screens */
-    }
-
-    .container {
-        background: rgba(255, 255, 255, 0.15);
-        padding: 20px;
-        border-radius: 15px;
-        backdrop-filter: blur(15px);
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-        width: 100%;
-        max-width: 400px;
-        color: white;
-    }
-
-    h2 {
-        text-align: center;
-        margin-bottom: 20px;
-        font-size: 1.5rem;
-        line-height: 1.3;
-    }
-
-    label {
-        font-weight: bold;
-        display: block;
-        margin-bottom: 5px;
-        font-size: 0.9rem;
-    }
-
-    input, select, textarea {
-        width: 100%;
-        padding: 12px;
-        border-radius: 8px;
-        border: none;
-        outline: none;
-        margin-bottom: 15px;
-        background: rgba(255, 255, 255, 0.9);
-        font-size: 1rem;
-    }
-
-    textarea {
-        resize: none;
-        min-height: 80px;
-    }
-
-    button {
-        width: 100%;
-        padding: 14px;
-        background: #ff9800;
-        border: none;
-        border-radius: 8px;
-        color: white;
-        font-size: 1rem;
-        font-weight: bold;
-        cursor: pointer;
-        transition: background 0.3s ease;
-    }
-
-    button:hover {
-        background: #e68900;
-    }
-
-    /* ✅ Mobile: ≤500px */
-    @media (max-width: 500px) {
-        body {
-            padding: 10px;
-        }
-        .container {
-            padding: 15px;
-        }
-        h2 {
-            font-size: 1.3rem;
-        }
-        input, select, textarea {
-            font-size: 0.95rem;
-            padding: 10px;
-        }
-        button {
-            font-size: 0.95rem;
-            padding: 12px;
-        }
-    }
-
-    /* ✅ Extra small devices: ≤350px */
-    @media (max-width: 350px) {
-        h2 {
-            font-size: 1.1rem;
-        }
-        label {
-            font-size: 0.85rem;
-        }
-        input, select, textarea, button {
-            font-size: 0.9rem;
-            padding: 10px;
-        }
-    }
+body{font-family:Arial,Helvetica,sans-serif;background:#f7fbff;margin:0;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:16px}
+.wrap{max-width:620px;width:100%;background:#fff;padding:20px;border-radius:12px;box-shadow:0 6px 24px rgba(0,0,0,.08)}
+h2{margin:0 0 12px;color:#0077b6}
+form{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.full{grid-column:1 / -1}
+input,textarea,select{padding:10px;border:1px solid #cfd6df;border-radius:8px;width:100%}
+.btn{grid-column:1 / -1;padding:12px;border:none;border-radius:10px;background:#0077b6;color:#fff;font-weight:800;cursor:pointer}
+.note{margin-top:8px;color:#555}
+@media (max-width:600px){ form{grid-template-columns:1fr} .full{grid-column:1 / -1} }
 </style>
-
 </head>
 <body>
-
-<div class="container">
-    <h2>Shipping Details</h2>
-    <form id="shippingForm">
-        <label>Full Name</label>
-        <input type="text" id="name" placeholder="Enter your full name" required>
-
-        <label>Email</label>
-        <input type="email" id="email" placeholder="Enter your email" required>
-
-        <label>Phone Number</label>
-        <input type="tel" id="phone" placeholder="Enter your phone number" required pattern="[0-9]{10}">
-
-        <label>Address</label>
-        <textarea id="address" placeholder="Enter your shipping address" required></textarea>
-
-        <label>City</label>
-        <input type="text" id="city" placeholder="Enter your city" required>
-
-        <label>State</label>
-        <select id="state" required>
-            <option value="">Select State</option>
-            <option>Tamil Nadu</option>
-            <option>Kerala</option>
-            <option>Karnataka</option>
-            <option>Andhra Pradesh</option>
-            <option>Telangana</option>
-        </select>
-
-        <label>Pincode</label>
-        <input type="text" id="pincode" placeholder="Enter your pincode" required pattern="[0-9]{6}">
-
-        <button type="submit">Submit Details</button>
-    </form>
+<div class="wrap">
+  <h2>Shipping Details</h2>
+  <form id="shipForm">
+    <input class="full" id="name" placeholder="Recipient Name" required />
+    <input id="phone" placeholder="Phone" required />
+    <input id="city" placeholder="City" required />
+    <input id="state" placeholder="State" required />
+    <input id="pincode" placeholder="Pincode" required />
+    <textarea class="full" id="address" placeholder="Address" rows="3" required></textarea>
+    <button class="btn" type="submit">Continue to Payment</button>
+  </form>
+  <div class="note" id="msg"></div>
 </div>
 
 <script>
-    document.getElementById("shippingForm").addEventListener("submit", function(e) {
-        e.preventDefault();
-        alert("Your shipping details have been submitted successfully! Click OK to proceed to payment.");
-        window.location.href = "payment.html"; // redirect to confirmation page
-    });
+document.addEventListener('DOMContentLoaded', () => {
+  const msg = document.getElementById('msg');
+
+  // ✅ Retrieve auth and cart from sessionStorage (or localStorage if needed)
+  const auth = JSON.parse(sessionStorage.getItem('auth') || '{}');
+  const cart = JSON.parse(sessionStorage.getItem('cartItems') || '[]');
+
+  // ===== LOGIN REQUIRED EVERY PURCHASE =====
+  if (!auth.userId) {
+    alert("⚠️ Login required to continue.");
+    if (cart.length) sessionStorage.setItem('cartBeforeLogin', JSON.stringify(cart));
+    sessionStorage.setItem('redirectAfterLogin', 'shipping.html');
+    window.location.href = 'login.html';
+    return;
+  }
+
+  // ===== CART MUST NOT BE EMPTY =====
+  if (!cart.length) {
+    alert("⚠️ Your cart is empty.");
+    window.location.href = 'products.html';
+    return;
+  }
+
+  // ===== RENDER CART ITEMS IN SHIPPING PAGE =====
+  const cartContainer = document.getElementById('cartItems');
+  const totalBox = document.getElementById('totalPrice');
+  let total = 0;
+
+  if (cartContainer) {
+    cartContainer.innerHTML = cart.map(item => {
+      const line = item.price * item.qty;
+      total += line;
+      return `
+        <div class="cart-item">
+          <img src="${item.img}" alt="${item.name}" width="60">
+          <div class="item-info">
+            <div>${item.name} × ${item.qty}</div>
+            <div>₹${item.price} × ${item.qty} = ₹${line}</div>
+          </div>
+        </div>
+      `;
+    }).join("");
+  }
+  if (totalBox) totalBox.textContent = total;
+
+  // ===== SHIPPING FORM SUBMIT =====
+  const shipForm = document.getElementById('shipForm');
+  if (!shipForm) return;
+
+  shipForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    msg.textContent = "";
+
+    const shipping = {
+      name: document.getElementById('name').value.trim(),
+      phone: document.getElementById('phone').value.trim(),
+      city: document.getElementById('city').value.trim(),
+      state: document.getElementById('state').value.trim(),
+      pincode: document.getElementById('pincode').value.trim(),
+      address: document.getElementById('address').value.trim()
+    };
+
+    // ===== VALIDATION =====
+    if (!shipping.name || !shipping.phone || !shipping.address) {
+      msg.textContent = "⚠️ Fill all required fields.";
+      msg.style.color = "red";
+      return;
+    }
+    if (!/^\d{10}$/.test(shipping.phone)) {
+      msg.textContent = "⚠️ Enter a valid 10-digit phone number.";
+      msg.style.color = "red";
+      return;
+    }
+    if (!/^\d{6}$/.test(shipping.pincode)) {
+      msg.textContent = "⚠️ Enter a valid 6-digit pincode.";
+      msg.style.color = "red";
+      return;
+    }
+
+    // ===== SAVE SHIPPING INFO AND ORDER ID =====
+    sessionStorage.setItem('shippingInfo', JSON.stringify(shipping));
+    if (!sessionStorage.getItem('orderId')) {
+      sessionStorage.setItem('orderId', 'ORD-' + Date.now());
+    }
+
+    // ===== REDIRECT TO PAYMENT PAGE =====
+    window.location.href = 'payment.html';
+  });
+});
 </script>
 
 
 </body>
 </html>
-
