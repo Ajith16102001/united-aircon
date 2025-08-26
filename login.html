@@ -1,251 +1,161 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Animated Stylish Login / Signup</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Login / Signup</title>
 <style>
-    body {
-        margin: 0;
-        font-family: Arial, sans-serif;
-        min-height: 100vh;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        background: linear-gradient(120deg, #ff7e5f, #feb47b);
-        animation: bgFade 8s infinite alternate ease-in-out;
-        padding: 10px; /* Prevents overflow on small screens */
-        box-sizing: border-box;
-    }
-
-    @keyframes bgFade {
-        0% { background: linear-gradient(120deg, #ff7e5f, #feb47b); }
-        100% { background: linear-gradient(120deg, #6a11cb, #2575fc); }
-    }
-
-    .container {
-        position: relative;
-        width: 100%;
-        max-width: 400px;
-        background: rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(15px);
-        padding: 30px 20px;
-        border-radius: 15px;
-        box-shadow: 0px 8px 25px rgba(0,0,0,0.2);
-        color: white;
-        animation: scaleUp 0.6s ease;
-        box-sizing: border-box;
-    }
-
-    @keyframes scaleUp {
-        from { transform: scale(0.8); opacity: 0; }
-        to { transform: scale(1); opacity: 1; }
-    }
-
-    .switch-btn {
-        display: flex;
-        justify-content: center;
-        margin-bottom: 20px;
-        gap: 10px;
-        flex-wrap: wrap; /* Prevents overflow on small devices */
-    }
-
-    .switch-btn button {
-        background: rgba(255,255,255,0.2);
-        border: none;
-        padding: 10px 20px;
-        color: white;
-        font-weight: bold;
-        cursor: pointer;
-        border-radius: 30px;
-        transition: 0.3s;
-        font-size: 14px;
-    }
-
-    .switch-btn button.active {
-        background: #ffffff;
-        color: #2575fc;
-        box-shadow: 0 0 10px rgba(255,255,255,0.8);
-    }
-
-    h2 {
-        text-align: center;
-        margin-bottom: 20px;
-        font-size: 20px;
-    }
-
-    .form-group {
-        margin-bottom: 15px;
-    }
-
-    input {
-        width: 100%;
-        padding: 12px;
-        border: none;
-        border-radius: 25px;
-        outline: none;
-        background: rgba(255,255,255,0.2);
-        color: white;
-        font-size: 14px;
-        box-sizing: border-box;
-    }
-
-    input::placeholder {
-        color: rgba(255,255,255,0.7);
-    }
-
-    .btn {
-        width: 100%;
-        padding: 12px;
-        background: white;
-        color: #2575fc;
-        border: none;
-        border-radius: 25px;
-        cursor: pointer;
-        font-weight: bold;
-        font-size: 14px;
-        transition: 0.3s;
-    }
-
-    .btn:hover {
-        background: #ffdd57;
-        color: black;
-    }
-
-    .hidden {
-        display: none;
-    }
-
-    /* ✅ Mobile optimization */
-    @media (max-width: 480px) {
-        body {
-            padding: 20px;
-        }
-
-        .container {
-            padding: 20px;
-        }
-
-        h2 {
-            font-size: 18px;
-        }
-
-        input, .btn {
-            font-size: 13px;
-            padding: 10px;
-        }
-
-        .switch-btn button {
-            font-size: 12px;
-            padding: 8px 15px;
-        }
-    }
+:root{--accent:#34d399;--muted:#9ca3af}
+body{margin:0;height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#0f172a,#021025);font-family:Inter,Segoe UI,Arial,sans-serif;color:#fff}
+.card{width:360px;background:rgba(255,255,255,0.04);padding:20px;border-radius:12px;box-shadow:0 8px 30px rgba(2,6,23,0.7)}
+.tabs{display:flex;gap:8px;justify-content:center;margin-bottom:12px}
+.tab{padding:8px 14px;border-radius:999px;background:rgba(255,255,255,0.06);cursor:pointer;color:#fff}
+.tab.active{background:#fff;color:#0b1220;box-shadow:0 6px 14px rgba(0,0,0,0.4)}
+h2{text-align:center;margin:4px 0 12px;font-weight:600}
+.form-row{margin:8px 0}
+input{width:100%;padding:10px;border-radius:8px;border:none;background:rgba(255,255,255,0.03);color:#fff;outline:none}
+button.primary{width:100%;padding:10px;border-radius:8px;border:none;background:var(--accent);color:#04211a;font-weight:700;cursor:pointer;margin-top:10px}
+.msg{height:20px;margin-top:8px;text-align:center;font-weight:600;color:#ffdede}
+.hidden{display:none}
+small.note{display:block;margin-top:6px;color:var(--muted);font-size:12px;text-align:center}
 </style>
-
 </head>
 <body>
+<div class="card" role="main">
+  <div class="tabs">
+    <div id="tabLogin" class="tab active" onclick="showForm('login')">Login</div>
+    <div id="tabSignup" class="tab" onclick="showForm('signup')">Signup</div>
+  </div>
 
-<div class="container">
-    <div class="switch-btn">
-        <button id="loginBtn" class="active" onclick="showForm('login')">Login</button>
-        <button id="signupBtn" onclick="showForm('signup')">Signup</button>
-    </div>
+  <!-- LOGIN FORM -->
+  <div id="loginForm">
+    <h2>Login</h2>
+    <div class="form-row"><input id="loginUsername" placeholder="Username / Email" autocomplete="username"></div>
+    <div class="form-row"><input id="loginPassword" type="password" placeholder="Password" autocomplete="current-password"></div>
+    <button id="loginSubmit" class="primary" type="button">Login</button>
+    <div id="loginMsg" class="msg"></div>
+    <small class="note">Demo: enter any non-empty credentials</small>
+  </div>
 
-    <div id="loginForm">
-        <h2>Login</h2>
-        <div class="form-group">
-            <input type="text" id="loginUsername" placeholder="Username" required>
-        </div>
-        <div class="form-group">
-            <input type="password" id="loginPassword" placeholder="Password" required>
-        </div>
-        <button class="btn" onclick="loginUser()">Login</button>
-    </div>
-
-    <div id="signupForm" class="hidden">
-        <h2>Signup</h2>
-        <div class="form-group">
-            <input type="text" id="signupName" placeholder="Full Name" required>
-        </div>
-        <div class="form-group">
-            <input type="email" id="signupEmail" placeholder="Email" required>
-        </div>
-        <div class="form-group">
-            <input type="text" id="signupUsername" placeholder="Username" required>
-        </div>
-        <div class="form-group">
-            <input type="password" id="signupPassword" placeholder="Password" required>
-        </div>
-        <div class="form-group">
-            <input type="password" id="signupConfirmPassword" placeholder="Confirm Password" required>
-        </div>
-        <button class="btn" onclick="signupUser()">Signup</button>
-    </div>
+  <!-- SIGNUP FORM -->
+  <div id="signupForm" class="hidden">
+    <h2>Create account</h2>
+    <div class="form-row"><input id="signupName" placeholder="Full name" autocomplete="name"></div>
+    <div class="form-row"><input id="signupEmail" placeholder="Email" autocomplete="email"></div>
+    <div class="form-row"><input id="signupUsername" placeholder="Username" autocomplete="username"></div>
+    <div class="form-row"><input id="signupPassword" type="password" placeholder="Password" autocomplete="new-password"></div>
+    <div class="form-row"><input id="signupConfirmPassword" type="password" placeholder="Confirm password" autocomplete="new-password"></div>
+    <button id="signupSubmit" class="primary" type="button">Create Account</button>
+    <div id="signupMsg" class="msg"></div>
+  </div>
 </div>
 
 <script>
-    let registeredUser = null;
+document.addEventListener('DOMContentLoaded', () => {
+  const S = sessionStorage;
+  const L = localStorage;
+  const $ = id => document.getElementById(id);
 
-    function showForm(form) {
-        document.getElementById('loginForm').classList.toggle('hidden', form !== 'login');
-        document.getElementById('signupForm').classList.toggle('hidden', form !== 'signup');
-        document.getElementById('loginBtn').classList.toggle('active', form === 'login');
-        document.getElementById('signupBtn').classList.toggle('active', form === 'signup');
+  // --- Tab switch ---
+  window.showForm = (mode) => {
+    if(mode==='signup'){
+      $('loginForm').classList.add('hidden');
+      $('signupForm').classList.remove('hidden');
+      $('tabLogin').classList.remove('active');
+      $('tabSignup').classList.add('active');
+      $('signupName')?.focus();
+    } else {
+      $('signupForm').classList.add('hidden');
+      $('loginForm').classList.remove('hidden');
+      $('tabSignup').classList.remove('active');
+      $('tabLogin').classList.add('active');
+      $('loginUsername')?.focus();
+    }
+  }
+  showForm('login');
+
+  function readJSON(store,key,fallback=null){ try{ const v=store.getItem(key); return v?JSON.parse(v):fallback }catch{ return fallback } }
+  function writeJSON(store,key,obj){ store.setItem(key,JSON.stringify(obj)) }
+  function removeKey(store,key){ try{ store.removeItem(key) }catch{} }
+
+  function getSavedCart(){ return S.getItem('cartBeforeLogin') ?? L.getItem('cartBeforeLogin') ?? null }
+
+  // --- LOGIN ---
+  $('loginSubmit')?.addEventListener('click', ()=>{
+    const msg = $('loginMsg');
+    msg.textContent=''; msg.style.color='red';
+    const username = $('loginUsername')?.value.trim()||'';
+    const password = $('loginPassword')?.value.trim()||'';
+
+    if(!username||!password){ msg.textContent='⚠️ Enter username and password'; return; }
+
+    // Local users check
+    let users = readJSON(L,'users',[]);
+    let matched = users.find(u=> (u.username===username||u.email===username) && u.password===password);
+    let user;
+    if(matched){
+      user = {userId:matched.userId, username:matched.username, email:matched.email};
+    } else { 
+      // Demo login: allow any credentials
+      user = {userId:Date.now(), username, email:username.includes('@')?username:username+'@example.com'};
     }
 
-    function signupUser() {
-        const name = document.getElementById('signupName').value.trim();
-        const email = document.getElementById('signupEmail').value.trim();
-        const username = document.getElementById('signupUsername').value.trim();
-        const password = document.getElementById('signupPassword').value.trim();
-        const confirmPassword = document.getElementById('signupConfirmPassword').value.trim();
+    writeJSON(S,'auth',user);
 
-        // Name validation
-        if (!/^[A-Za-z\s]+$/.test(name)) {
-            alert("Name must contain only letters.");
-            return;
-        }
-        // Email validation
-        if (!/^\S+@\S+\.\S+$/.test(email)) {
-            alert("Please enter a valid email address.");
-            return;
-        }
-        // Required fields
-        if (!name || !email || !username || !password || !confirmPassword) {
-            alert("All fields are required.");
-            return;
-        }
-        // Password match
-        if (password !== confirmPassword) {
-            alert("Passwords do not match.");
-            return;
-        }
-
-        // Save user
-        registeredUser = { username, password };
-        alert("Successfully signed up! Now you can login.");
-        showForm('login');
+    // restore cart
+    const savedCart = getSavedCart();
+    if(savedCart && (!S.getItem('cartItems')||S.getItem('cartItems')==='[]')){
+      S.setItem('cartItems',savedCart);
+      removeKey(S,'cartBeforeLogin'); removeKey(L,'cartBeforeLogin');
     }
 
-    function loginUser() {
-        const username = document.getElementById('loginUsername').value.trim();
-        const password = document.getElementById('loginPassword').value.trim();
+    msg.style.color='lightgreen';
+    msg.textContent='✅ Login successful — redirecting to shipping...';
+    setTimeout(()=> window.location.href='shipping.html',600);
+  });
 
-        if (!registeredUser) {
-            alert("Please signup first!");
-            return;
-        }
-       if (username === registeredUser.username && password === registeredUser.password) {
-    if (confirm("Login successful! Please enter your details to proceed with shipping your products.")) {
-        window.location.href = "shipping.html"; // Change to your shipping details page
-    }
-} else {
-    alert("Invalid username or password.");
-}
+  // --- SIGNUP ---
+  $('signupSubmit')?.addEventListener('click', ()=>{
+    const msg = $('signupMsg');
+    msg.textContent=''; msg.style.color='red';
+    const name = $('signupName')?.value.trim()||'';
+    const email = $('signupEmail')?.value.trim()||'';
+    const username = $('signupUsername')?.value.trim()||'';
+    const password = $('signupPassword')?.value||'';
+    const confirm = $('signupConfirmPassword')?.value||'';
 
+    if(!name||!email||!username||!password||!confirm){ msg.textContent='⚠️ All fields required'; return; }
+    if(password!==confirm){ msg.textContent='⚠️ Passwords do not match'; return; }
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ msg.textContent='⚠️ Enter a valid email'; return; }
+
+    let users = readJSON(L,'users',[]);
+    if(users.find(u=> u.username===username||u.email===email)){ msg.textContent='⚠️ Username or email already exists'; return; }
+
+    const newUser = { userId:Date.now(), username, email, password };
+    users.push(newUser); writeJSON(L,'users',users);
+    const authUser = { userId:newUser.userId, username:newUser.username, email:newUser.email };
+    writeJSON(S,'auth',authUser);
+
+    // restore cart
+    const savedCart = getSavedCart();
+    if(savedCart && (!S.getItem('cartItems')||S.getItem('cartItems')==='[]')){
+      S.setItem('cartItems',savedCart);
+      removeKey(S,'cartBeforeLogin'); removeKey(L,'cartBeforeLogin');
     }
+
+    msg.style.color='lightgreen';
+    msg.textContent='✅ Signup successful — redirecting to shipping...';
+    setTimeout(()=> window.location.href='shipping.html',600);
+  });
+
+  // Enter key submit
+  document.addEventListener('keydown',(e)=>{
+    if(e.key!=='Enter') return;
+    if(!$('loginForm')?.classList.contains('hidden')) $('loginSubmit')?.click();
+    else if(!$('signupForm')?.classList.contains('hidden')) $('signupSubmit')?.click();
+  });
+  $('loginUsername')?.focus();
+});
 </script>
-
 </body>
 </html>
-
