@@ -59,16 +59,16 @@ document.addEventListener('DOMContentLoaded', () => {
   // --- Tab switch ---
   window.showForm = (mode) => {
     if(mode==='signup'){
-      $('loginForm').classList.add('hidden');
-      $('signupForm').classList.remove('hidden');
-      $('tabLogin').classList.remove('active');
-      $('tabSignup').classList.add('active');
+      $('loginForm')?.classList.add('hidden');
+      $('signupForm')?.classList.remove('hidden');
+      $('tabLogin')?.classList.remove('active');
+      $('tabSignup')?.classList.add('active');
       $('signupName')?.focus();
     } else {
-      $('signupForm').classList.add('hidden');
-      $('loginForm').classList.remove('hidden');
-      $('tabSignup').classList.remove('active');
-      $('tabLogin').classList.add('active');
+      $('signupForm')?.classList.add('hidden');
+      $('loginForm')?.classList.remove('hidden');
+      $('tabSignup')?.classList.remove('active');
+      $('tabLogin')?.classList.add('active');
       $('loginUsername')?.focus();
     }
   }
@@ -84,29 +84,37 @@ document.addEventListener('DOMContentLoaded', () => {
   $('loginSubmit')?.addEventListener('click', ()=>{
     const msg = $('loginMsg');
     msg.textContent=''; msg.style.color='red';
-    const username = $('loginUsername')?.value.trim()||'';
+    const usernameInput = $('loginUsername')?.value.trim()||'';
     const password = $('loginPassword')?.value.trim()||'';
 
-    if(!username||!password){ msg.textContent='⚠️ Enter username and password'; return; }
+    if(!usernameInput||!password){ msg.textContent='⚠️ Enter username and password'; return; }
 
-    // Local users check
-    let users = readJSON(L,'users',[]);
-    let matched = users.find(u=> (u.username===username||u.email===username) && u.password===password);
-    let user;
-    if(matched){
-      user = {userId:matched.userId, username:matched.username, email:matched.email};
-    } else { 
-      // Demo login: allow any credentials
-      user = {userId:Date.now(), username, email:username.includes('@')?username:username+'@example.com'};
+    // Get users DB
+    const users = Array.isArray(readJSON(L,'users',[])) ? readJSON(L,'users',[]) : [];
+
+    // 1) User must EXIST (username or email)
+    const foundUser = users.find(u => u.username === usernameInput || u.email === usernameInput);
+    if(!foundUser){
+      msg.textContent = '⚠️ Please signup first';
+      return;
     }
 
+    // 2) If exists, PASSWORD must MATCH
+    if(foundUser.password !== password){
+      msg.textContent = '⚠️ Invalid details';
+      return;
+    }
+
+    // 3) Success -> set auth, restore cart, go shipping
+    const user = { userId:foundUser.userId, username:foundUser.username, email:foundUser.email };
     writeJSON(S,'auth',user);
 
-    // restore cart
+    // restore cart only on successful login
     const savedCart = getSavedCart();
-    if(savedCart && (!S.getItem('cartItems')||S.getItem('cartItems')==='[]')){
-      S.setItem('cartItems',savedCart);
-      removeKey(S,'cartBeforeLogin'); removeKey(L,'cartBeforeLogin');
+    if(savedCart && (!S.getItem('cartItems') || S.getItem('cartItems') === '[]')){
+      S.setItem('cartItems', savedCart);
+      removeKey(S,'cartBeforeLogin'); 
+      removeKey(L,'cartBeforeLogin');
     }
 
     msg.style.color='lightgreen';
@@ -128,24 +136,32 @@ document.addEventListener('DOMContentLoaded', () => {
     if(password!==confirm){ msg.textContent='⚠️ Passwords do not match'; return; }
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ msg.textContent='⚠️ Enter a valid email'; return; }
 
-    let users = readJSON(L,'users',[]);
-    if(users.find(u=> u.username===username||u.email===email)){ msg.textContent='⚠️ Username or email already exists'; return; }
+    const users = Array.isArray(readJSON(L,'users',[])) ? readJSON(L,'users',[]) : [];
 
-    const newUser = { userId:Date.now(), username, email, password };
-    users.push(newUser); writeJSON(L,'users',users);
-    const authUser = { userId:newUser.userId, username:newUser.username, email:newUser.email };
-    writeJSON(S,'auth',authUser);
-
-    // restore cart
-    const savedCart = getSavedCart();
-    if(savedCart && (!S.getItem('cartItems')||S.getItem('cartItems')==='[]')){
-      S.setItem('cartItems',savedCart);
-      removeKey(S,'cartBeforeLogin'); removeKey(L,'cartBeforeLogin');
+    if(users.find(u=> u.username===username || u.email===email)){
+      msg.textContent='⚠️ Username or email already exists';
+      return;
     }
 
+    const newUser = { userId:Date.now(), name, username, email, password };
+    users.push(newUser); 
+    writeJSON(L,'users',users);
+
+    // IMPORTANT: Do NOT auto-login here.
+    // Show message "you can login now" and switch to login tab.
     msg.style.color='lightgreen';
-    msg.textContent='✅ Signup successful — redirecting to shipping...';
-    setTimeout(()=> window.location.href='shipping.html',600);
+    msg.textContent='✅ Signup successful — you can login now';
+
+    setTimeout(()=>{
+      showForm('login');
+      const loginMsg = $('loginMsg');
+      if(loginMsg){
+        loginMsg.style.color='lightgreen';
+        loginMsg.textContent='ℹ️ You can login now with your new account';
+      }
+      if($('loginUsername')) $('loginUsername').value = username;  // prefill for convenience
+      $('loginPassword')?.focus();
+    }, 700);
   });
 
   // Enter key submit
@@ -157,5 +173,6 @@ document.addEventListener('DOMContentLoaded', () => {
   $('loginUsername')?.focus();
 });
 </script>
+
 </body>
 </html>
