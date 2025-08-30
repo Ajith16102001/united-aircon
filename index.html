@@ -222,8 +222,10 @@
   <a href="#book">Book Service</a>
   <a href="#areas">Service Areas</a>
   <a href="#contact">Contact</a>
-  <a href="#customer reviews">Reviews</a>
+  <a href="#reviews">Reviews</a>
   <a href="#gallery">Gallery</a>
+  
+  <a href="./admin.html">admin</a>
 </nav>
 
 <section id="home">
@@ -238,19 +240,19 @@
     <div class="card">
       <img src="./pictures/sales1.jpg" alt="AC Sales">
       <h3>AC Sales</h3>
-      <p>Starting from ₹25,000</p>
+      <p>Starting from ₹45,000</p>
     </div>
     
     <div class="card">
       <img src="./pictures/service1.jpg" alt="AC Repair">
       <h3>AC Repair</h3>
-      <p>Starting from ₹500</p>
+      <p>Starting from ₹2000</p>
     </div>
     
     <div class="card">
       <img src="./pictures/maintain1.jpg" alt="AC Maintenance">
       <h3>AC Maintenance</h3>
-      <p>Starting from ₹800</p>
+      <p>Starting from ₹1500</p>
     </div>
     
   </div>
@@ -299,34 +301,36 @@
 </section>
 
 
+<section id="reviews">
 <div class="reviews-section">
     <h2 class="custo">Customer Reviews</h2>
     <div class="review active">
         <div class="stars">★★★★★</div>
-        <p>"Excellent service! My AC is working perfectly now. Highly recommended!"</p>
+        <p>"Excellent service! My AC is working perfectly now. Highly recommended! Thank you Ajith"</p>
         <h4>- obito uchiha</h4>
     </div>
     <div class="review">
         <div class="stars">★★★★☆</div>
-        <p>"Quick response and professional technicians. Very satisfied with the work."</p>
+        <p>"Quick response and professional technicians. Very satisfied with the work! Thank you Ajith."</p>
         <h4>- madara uchiha</h4>
     </div>
     <div class="review">
         <div class="stars">★★★★★</div>
-        <p>"Affordable prices and great customer service. Will call them again next summer!"</p>
+        <p>"Affordable prices and great customer service. Will call them again next summer! Thank you Ajith"</p>
         <h4>- shisui uchiha</h4>
     </div>
 	<div class="review">
         <div class="stars">★★★★☆</div>
-        <p>"Quick response and professional technicians. Very satisfied with the work."</p>
+        <p>"Quick response and professional technicians. Very satisfied with the work! Thank you Ajith"</p>
         <h4>- Itachi uchiha</h4>
     </div>
 	<div class="review">
         <div class="stars">★★★★☆</div>
-        <p>"Quick response and professional technicians. Very satisfied with the work."</p>
+        <p>"Quick response and professional technicians. Very satisfied with the work! Thank you Ajith"</p>
         <h4>- sasuke uchiha</h4>
     </div>
 </div>
+</section>
 
 
 <section id="gallery">
@@ -341,6 +345,7 @@
 <footer>
   <p>&copy; 2025 CoolAir. All rights reserved.</p>
 </footer>
+
 
 <script>
 document.getElementById('serviceForm').addEventListener('submit', function(e){
@@ -396,7 +401,7 @@ document.getElementById('serviceForm').addEventListener('submit', function(e){
 
     // ✅ Send to backend if valid
     if (isValid) {
-        fetch("http://localhost:5000/api/book-service", {
+        fetch("http://localhost:5000/api/bookings", {   // ✅ corrected endpoint
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ name, phone, service, address })
@@ -426,15 +431,22 @@ function showNextReview() {
     index = (index + 1) % reviews.length;
     reviews[index].classList.add('active');
 }
-
-setInterval(showNextReview, 3000); // Change every 3 seconds
+setInterval(showNextReview, 3000);
 
 // ==================== Products Page Redirect ====================
 document.getElementById('productsLink').addEventListener('click', function(e) {
-    e.preventDefault(); 
-    window.location.href = 'products.html'; 
+    e.preventDefault();
+    window.location.href = 'products.html';
+});
+
+// ==================== Admin Page Redirect ====================
+document.getElementById('adminButton').addEventListener('click', function(e) {
+    e.preventDefault();
+    window.location.href = 'admin.html';
 });
 </script>
+
+
 
 
 </body>
