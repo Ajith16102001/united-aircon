@@ -1,59 +1,71 @@
-const express = require('express');
-const session = require('express-session');
-const bcrypt = require('bcrypt');
-const path = require('path');
-const mysql = require('mysql2/promise');
+// server.js
+// Run: node server.js
+// Requires: npm i express mysql2 cors express-session bcrypt morgan
+
+const express = require("express");
+const session = require("express-session");
+const bcrypt = require("bcrypt");
+const path = require("path");
+const mysql = require("mysql2/promise");
+const cors = require("cors");
+const morgan = require("morgan");
 
 const app = express();
 
-// ===== MySQL Pool =====
+/* ====== CONFIG ====== */
+const PORT = process.env.PORT || 5000;
+const DB_HOST = process.env.DB_HOST || "localhost";
+const DB_USER = process.env.DB_USER || "root";
+const DB_PASS = process.env.DB_PASS || "unitedaircon";
+const DB_NAME = process.env.DB_NAME || "ac_store";
+
+/* ====== DB POOL ====== */
 const pool = mysql.createPool({
-  host: 'localhost',
-  user: 'root',
-  password: 'unitedaircon',
-  database: 'ac_store',
+  host: DB_HOST,
+  user: DB_USER,
+  password: DB_PASS,
+  database: DB_NAME,
   waitForConnections: true,
   connectionLimit: 10,
-  queueLimit: 0
+  queueLimit: 0,
 });
 
-// ===== Middlewares =====
-app.use(express.json());
+/* ====== MIDDLEWARES ====== */
+app.use(morgan("dev"));
+app.use(cors());
+app.use(express.json({ limit: "1mb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(
   session({
-    secret: 'super-secret-session',
+    secret: "super-secret-session",
     resave: false,
     saveUninitialized: false,
-    cookie: { maxAge: 1000 * 60 * 60 * 6 } // 6 hours
+    cookie: { maxAge: 1000 * 60 * 60 * 6 },
   })
 );
 
-// Serve frontend
-app.use(express.static(path.join(__dirname, 'public')));
+/* ====== STATIC FRONTEND ====== */
+app.use(express.static(path.join(__dirname, "public")));
 
-// ===== Helpers =====
+/* ====== HELPERS ====== */
 function ensureAuth(req, res, next) {
   if (req.session.user) return next();
   return res.status(401).json({ requiresLogin: true });
 }
-function getCart(req) {
-  if (!req.session.cart) req.session.cart = [];
-  return req.session.cart;
-}
 
-// ------------------ SIGNUP ------------------
-app.post('/signup', async (req, res) => {
+/* ====== USER AUTH ====== */
+app.post("/signup", async (req, res) => {
   try {
-    const { name, email, username, password } = req.body;
+    const { name, email, username, password } = req.body || {};
     if (!name || !email || !username || !password)
-      return res.status(400).json({ error: 'All fields required' });
+      return res.status(400).json({ error: "All fields required" });
 
     const [existing] = await pool.query(
       `SELECT id FROM users WHERE username=? OR email=?`,
       [username, email]
     );
-    if (existing.length) return res.status(400).json({ error: 'Username or Email exists' });
+    if (existing.length)
+      return res.status(400).json({ error: "Username or Email exists" });
 
     const hash = await bcrypt.hash(password, 10);
     const [result] = await pool.query(
@@ -61,188 +73,271 @@ app.post('/signup', async (req, res) => {
       [name, email, username, hash]
     );
 
-    res.json({ user: { userId: result.insertId, name, email, username } });
+    res.json({ user: { id: result.insertId, name, email, username } });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Server error' });
+    console.error("Signup error:", err);
+    res.status(500).json({ error: "Server error" });
   }
 });
 
-// ------------------ LOGIN ------------------
-app.post('/login', async (req, res) => {
+app.post("/login", async (req, res) => {
   try {
-    const { username, password } = req.body;
-    if (!username || !password) return res.status(400).json({ error: 'All fields required' });
-
-    const [rows] = await pool.query(`SELECT * FROM users WHERE username=?`, [username]);
+    const { username, password } = req.body || {};
+    const [rows] = await pool.query(`SELECT * FROM users WHERE username=?`, [
+      username,
+    ]);
     const user = rows[0];
-    if (!user) return res.status(404).json({ error: 'Invalid username or password' });
+    if (!user) return res.status(404).json({ error: "Invalid login" });
 
     const match = await bcrypt.compare(password, user.password);
-    if (!match) return res.status(401).json({ error: 'Incorrect password' });
+    if (!match) return res.status(401).json({ error: "Incorrect password" });
 
-    req.session.user = { id: user.id, name: user.name, email: user.email, username: user.username };
+    req.session.user = {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      username: user.username,
+    };
     res.json({ user: req.session.user });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Server error' });
+    console.error("Login error:", err);
+    res.status(500).json({ error: "Server error" });
   }
 });
 
-
-// --- Bookings ---
-app.get("/api/bookings", async (_req, res) => {
+/* ====== ADMIN LOGIN ====== */
+app.post("/api/admin/login", async (req, res) => {
+  const { username, password } = req.body || {};
   try {
-    const [rows] = await pool.query(`SELECT * FROM bookings ORDER BY created_at DESC`);
+    const [rows] = await pool.query(
+      `SELECT * FROM admin_users WHERE username = ? AND password = ?`,
+      [username, password]
+    );
+    if (!rows.length)
+      return res.status(401).json({ message: "Invalid credentials" });
+    req.session.admin = { id: rows[0].id, username: rows[0].username };
+    res.json({ message: "Login successful", admin: rows[0].username });
+  } catch (e) {
+    console.error("Admin login error:", e);
+    res.status(500).json({ message: "Failed to login" });
+  }
+});
+
+/* ====== PRODUCTS CRUD ====== */
+app.get("/api/admin/products", async (_req, res) => {
+  try {
+    const [rows] = await pool.query("SELECT * FROM products ORDER BY id DESC");
     res.json(rows);
   } catch (e) {
-    console.error("Get bookings error:", e);
-    res.status(500).json({ message: "Failed to fetch bookings" });
+    res.status(500).json({ error: e.message });
   }
 });
 
-app.post("/api/bookings", async (req, res) => {
-  const { name, phone, service, address } = req.body || {};
-  if (!name || !phone || !service || !address) return res.status(400).json({ message: "Missing fields" });
+app.post("/api/admin/products", async (req, res) => {
+  const { name, price, brand, ton, img } = req.body;
+  if (!name || !price)
+    return res.status(400).json({ error: "Name and Price are required" });
+
   try {
-    const [r] = await pool.query(
-      `INSERT INTO bookings (name, phone, service, address) VALUES (?,?,?,?)`,
-      [name, phone, service, address]
+    const [result] = await pool.query(
+      "INSERT INTO products (name, price, brand, ton, img) VALUES (?, ?, ?, ?, ?)",
+      [name, price, brand, ton, img]
     );
-    res.json({ message: "Booking saved", bookingId: r.insertId });
-  } catch (e) {
-    console.error("Create booking error:", e);
-    res.status(500).json({ message: "Failed to create booking" });
+    res.json({ success: true, id: result.insertId, message: "✅ Product added" });
+  } catch (err) {
+    console.error("Error inserting product:", err);
+    res.status(500).json({ error: "Database error" });
   }
 });
 
-// ------------------ SAVE SHIPPING ------------------
-app.post('/save-shipping', ensureAuth, (req, res) => {
-  const { shipping, cart } = req.body;
-  if (!shipping || !cart || !cart.length) return res.status(400).json({ error: 'Shipping or cart missing' });
-
-  req.session.shipping = shipping;
-  req.session.cart = cart;
-
-  // Create temporary orderId to use for payment/summary
-  const orderId = Date.now();
-  req.session.lastOrderId = orderId;
-
-  res.json({ orderId });
+app.put("/api/admin/products/:id", async (req, res) => {
+  const { id } = req.params;
+  const { name, price, brand, ton, img } = req.body;
+  try {
+    await pool.query(
+      "UPDATE products SET name=?, price=?, brand=?, ton=?, img=? WHERE id=?",
+      [name, price, brand, ton, img, id]
+    );
+    res.json({ message: "✅ Product updated" });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
-// ------------------ SAVE PAYMENT ------------------
-app.post('/save-payment', ensureAuth, async (req, res) => {
-  const { paymentMethod, extraCharge } = req.body;
-  const cart = req.session.cart;
-  const shipping = req.session.shipping;
-  const user = req.session.user;
+app.delete("/api/admin/products/:id", async (req, res) => {
+  try {
+    await pool.query("DELETE FROM products WHERE id=?", [req.params.id]);
+    res.json({ message: "🗑 Product deleted" });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
 
-  if (!cart || !cart.length) return res.status(400).json({ error: 'Cart empty' });
-  if (!shipping) return res.status(400).json({ error: 'Shipping info missing' });
 
-  const total = cart.reduce((s, it) => s + Number(it.price) * Number(it.qty), 0);
-  const paymentStatus = paymentMethod === 'cod' ? 'PENDING' : 'PAID';
+
+// Create a new order with items
+app.post("/api/orders", async (req, res) => {
+  const { user_id, items } = req.body; // items = [{product_id, quantity, unit_price}]
+
+  if (!user_id || !items || !items.length) {
+    return res.status(400).json({ error: "User and items are required" });
+  }
 
   const conn = await pool.getConnection();
   try {
     await conn.beginTransaction();
 
+    // Calculate total
+    const total_amount = items.reduce((sum, item) => sum + item.quantity * item.unit_price, 0);
+
     // Insert order
     const [orderResult] = await conn.query(
-      `INSERT INTO orders 
-      (user_id, shipping_name, shipping_phone, shipping_address1, shipping_city, shipping_state, shipping_zip, payment_method, payment_status, total_amount)
-      VALUES (?,?,?,?,?,?,?,?,?,?)`,
-      [
-        user.id,
-        shipping.name,
-        shipping.phone,
-        shipping.address,
-        shipping.city,
-        shipping.state,
-        shipping.pincode,
-        paymentMethod,
-        paymentStatus,
-        Number((total + (extraCharge || 0)).toFixed(2))
-      ]
+      "INSERT INTO orders (user_id, total_amount, status) VALUES (?, ?, ?)",
+      [user_id, total_amount, "Pending"]
     );
-
     const orderId = orderResult.insertId;
 
-    // Insert order items
-    for (const it of cart) {
+    // Insert each order item
+    for (const item of items) {
+      const [product] = await conn.query("SELECT name FROM products WHERE id=?", [item.product_id]);
+      const product_name = product[0].name;
+
       await conn.query(
-        `INSERT INTO order_items (order_id, product_name, quantity, unit_price, line_total)
-        VALUES (?,?,?,?,?)`,
+        `INSERT INTO order_items (order_id, product_id, product_name, quantity, unit_price, line_total) 
+         VALUES (?, ?, ?, ?, ?, ?)`,
         [
           orderId,
-          it.name,
-          it.qty,
-          Number(it.price),
-          Number((it.qty * it.price).toFixed(2))
+          item.product_id,
+          product_name,
+          item.quantity,
+          item.unit_price,
+          item.quantity * item.unit_price,
         ]
       );
     }
 
     await conn.commit();
-
-    // Store last order info in session for summary
-    req.session.lastOrderId = orderId;
-    req.session.paymentInfo = { method: paymentMethod, extraCharge: extraCharge || 0 };
-    req.session.cart = []; // clear cart
-
-    res.json({ orderId });
+    res.json({ orderId, message: "✅ Order created successfully" });
   } catch (err) {
     await conn.rollback();
-    console.error(err);
-    res.status(500).json({ error: 'Payment saving failed' });
+    console.error("Order creation error:", err);
+    res.status(500).json({ error: "Failed to create order" });
   } finally {
     conn.release();
   }
 });
 
-// ------------------ SUMMARY API ------------------
-app.get('/api/orders/:id', ensureAuth, async (req, res) => {
-  const orderId = req.params.id;
+
+
+const express = require('express');
+const mysql = require('mysql');
+const app = express();
+
+app.use(express.json()); // to parse JSON request bodies
+
+// ----------------- MySQL Connection -----------------
+const db = mysql.createConnection({
+  host: 'localhost',
+  user: 'root',
+  password: '12345',
+  database: 'ac_store'
+});
+
+db.connect(err => {
+  if (err) throw err;
+  console.log('MySQL connected');
+});
+
+// ----------------- Your Routes -----------------
+
+// Products routes here (if any)
+
+// ------ Paste the Admin Orders Route Here ------
+app.get('/api/admin/orders', (req, res) => {
+  const sql = `
+    SELECT 
+      o.id AS order_id,
+      o.user_name,
+      o.status,
+      o.created_at,
+      p.name AS product_name,
+      oi.quantity,
+      oi.total_price
+    FROM orders o
+    JOIN order_items oi ON oi.order_id = o.id
+    JOIN products p ON p.id = oi.product_id
+    ORDER BY o.id DESC
+  `;
+  db.query(sql, (err, results) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(results);
+  });
+});
+
+// Other routes, e.g., update shipping status
+app.put('/api/admin/orders/:id/shipping', (req, res) => {
+  const { status } = req.body;
+  const { id } = req.params;
+  db.query(`UPDATE orders SET status = ? WHERE id = ?`, [status, id], (err) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json({ message: 'Status updated' });
+  });
+});
+
+// ----------------- Start Server -----------------
+app.listen(3000, () => {
+  console.log('Server running on port 3000');
+});
+
+
+
+
+
+
+
+// Update order status (Admin)
+app.put("/api/admin/orders/:id/shipping", async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+  if (!status) return res.status(400).json({ error: "Status required" });
+
   try {
-    const [orders] = await pool.query(`SELECT * FROM orders WHERE id=?`, [orderId]);
-    if (!orders.length) return res.status(404).json({ error: 'Order not found' });
-
-    const order = orders[0];
-    const [items] = await pool.query(`SELECT * FROM order_items WHERE order_id=?`, [orderId]);
-
-    res.json({
-      orderId: order.id,
-      date: order.created_at || new Date(),
-      customer: { name: req.session.user.name, email: req.session.user.email },
-      shipping: {
-        name: order.shipping_name,
-        phone: order.shipping_phone,
-        address: order.shipping_address1,
-        city: order.shipping_city,
-        state: order.shipping_state,
-        pincode: order.shipping_zip
-      },
-      payment: {
-        method: order.payment_method,
-        extraCharge: order.payment_status === 'PENDING' ? 10 : 0
-      },
-      items,
-      totals: {
-        subtotal: items.reduce((s, it) => s + it.line_total, 0),
-        shipping: 200,
-        tax: items.reduce((s, it) => s + it.line_total, 0) * 0.18,
-        grand: items.reduce((s, it) => s + it.line_total, 0) * 1.18 + 200
-      },
-      status: order.payment_status
-    });
+    await pool.query("UPDATE orders SET status=? WHERE id=?", [status, id]);
+    res.json({ success: true, message: `Order #${id} status updated to ${status}` });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Failed to fetch order' });
+    console.error("Shipping update error:", err);
+    res.status(500).json({ error: "Database error" });
   }
 });
 
 
-// ------------------ START SERVER ------------------
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+
+/* ====== BOOKINGS ====== */
+app.post("/api/bookings", async (req, res) => {
+  const { name, phone, service, date } = req.body;
+  try {
+    const [result] = await pool.query(
+      "INSERT INTO bookings (name, phone, service, date) VALUES (?,?,?,?)",
+      [name, phone, service, date]
+    );
+    res.json({ success: true, id: result.insertId, message: "✅ Booking added" });
+  } catch (err) {
+    console.error("Booking insertion error:", err);
+    res.status(500).json({ error: "Database error" });
+  }
+});
+
+app.get("/api/admin/bookings", async (_req, res) => {
+  try {
+    const [rows] = await pool.query("SELECT * FROM bookings ORDER BY id DESC");
+    res.json(rows);
+  } catch (err) {
+    console.error("Fetch bookings error:", err);
+    res.status(500).json({ error: "Database error" });
+  }
+});
+
+/* ====== START SERVER ====== */
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
+});
