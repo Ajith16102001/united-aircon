@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Admin Dashboard</title>
+<style>
+  :root { --brand:#4a90e2; --ok:#10b981; --warn:#f59e0b; --danger:#ef4444; }
+  *{box-sizing:border-box;font-family:Arial, Helvetica, sans-serif}
+  body{margin:0;background:#f5f7fb;color:#111}
+  header{background:#111;color:#fff;padding:14px 16px;display:flex;align-items:center;justify-content:space-between}
+  header h1{font-size:18px;margin:0}
+  header a{color:#fff;text-decoration:none;margin-left:12px}
+  .wrap{max-width:1100px;margin:20px auto;padding:0 12px}
+  .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+  .tabs button{border:none;background:#e5e7eb;padding:10px 14px;border-radius:8px;cursor:pointer}
+  .tabs button.active{background:var(--brand);color:#fff}
+  .card{background:#fff;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,.06);padding:14px;margin-bottom:16px}
+  .row{display:flex;gap:12px;flex-wrap:wrap}
+  .row > *{flex:1 1 280px}
+  form input, form select{width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;margin-bottom:8px}
+  form .btn{background:var(--ok);color:#fff;border:none;border-radius:8px;padding:10px 14px;cursor:pointer}
+  form .btn:hover{filter:brightness(0.95)}
+  table{width:100%;border-collapse:collapse}
+  th,td{border-bottom:1px solid #eee;padding:10px;text-align:left}
+  th{background:#f8fafc;font-weight:700}
+  .actions button{border:none;border-radius:6px;padding:6px 10px;margin-right:6px;cursor:pointer}
+  .btn-edit{background:var(--warn);color:#111}
+  .btn-del{background:var(--danger);color:#fff}
+  .btn-ship{background:var(--brand);color:#fff}
+  .note{font-size:13px;color:#555}
+  @media (max-width: 720px){
+    table, thead, tbody, th, td, tr{display:block}
+    thead tr{position:absolute;top:-9999px;left:-9999px}
+    tr{background:#fff;margin-bottom:10px;border-radius:10px;padding:10px}
+    td{border:none;position:relative;padding-left:110px}
+    td::before{position:absolute;left:10px;top:10px;width:95px;white-space:nowrap;color:#555;font-weight:700}
+    /* Products labels */
+    #productsTable td:nth-of-type(1):before{content:"ID"}
+    #productsTable td:nth-of-type(2):before{content:"Name"}
+    #productsTable td:nth-of-type(3):before{content:"Price"}
+    #productsTable td:nth-of-type(4):before{content:"Brand"}
+    #productsTable td:nth-of-type(5):before{content:"Ton"}
+    #productsTable td:nth-of-type(6):before{content:"Image"}
+    #productsTable td:nth-of-type(7):before{content:"Actions"}
+    /* Orders labels */
+    #ordersTable td:nth-of-type(1):before{content:"ID"}
+    #ordersTable td:nth-of-type(2):before{content:"User ID"}
+    #ordersTable td:nth-of-type(3):before{content:"Total"}
+    #ordersTable td:nth-of-type(4):before{content:"Payment"}
+    #ordersTable td:nth-of-type(5):before{content:"Shipping"}
+    #ordersTable td:nth-of-type(6):before{content:"Created"}
+    #ordersTable td:nth-of-type(7):before{content:"Actions"}
+    /* Bookings labels */
+    #bookingsTable td:nth-of-type(1):before{content:"ID"}
+    #bookingsTable td:nth-of-type(2):before{content:"Name"}
+    #bookingsTable td:nth-of-type(3):before{content:"Phone"}
+    #bookingsTable td:nth-of-type(4):before{content:"Service"}
+    #bookingsTable td:nth-of-type(5):before{content:"Address"}
+    #bookingsTable td:nth-of-type(6):before{content:"Created"}
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Admin Dashboard</h1>
+  <nav>
+    <a href="index.html">Home</a>
+  </nav>
+</header>
+
+<div class="wrap">
+  <div class="tabs">
+    <button class="active" data-tab="productsTab">Products</button>
+    <button data-tab="ordersTab">Orders</button>
+    <button data-tab="bookingsTab">Bookings</button>
+  </div>
+
+  <!-- PRODUCTS -->
+  <section id="productsTab" class="card">
+    <h2>Manage Products</h2>
+    <div class="row">
+      <form id="productForm" class="card" style="flex:1">
+        <h3 id="pfTitle">Add Product</h3>
+        <input type="hidden" id="pid">
+        <input id="pname" placeholder="Name" required>
+        <input id="pprice" placeholder="Price" type="number" step="0.01" required>
+        <input id="pbrand" placeholder="Brand">
+        <input id="pton" placeholder="Ton (e.g., 1.5T)">
+        <input id="pimg" placeholder="Image URL">
+        <button class="btn" type="submit">Save</button>
+        <div class="note">Tip: Leave brand/ton/image blank if not applicable.</div>
+      </form>
+
+      <div class="card" style="flex:2">
+        <table id="productsTable">
+          <thead>
+            <tr>
+              <th>ID</th><th>Name</th><th>Price</th><th>Brand</th><th>Ton</th><th>Image</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ORDERS -->
+  <section id="ordersTab" class="card" style="display:none">
+    <h2>Orders</h2>
+    <div class="card">
+      <table id="ordersTable">
+        <thead>
+          <tr>
+            <th>ID</th><th>User ID</th><th>Total</th><th>Payment</th><th>Shipping</th><th>Created</th><th>Actions</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- BOOKINGS -->
+  <section id="bookingsTab" class="card" style="display:none">
+    <h2>Bookings</h2>
+    <div class="card">
+      <table id="bookingsTable">
+        <thead>
+          <tr>
+            <th>ID</th><th>Name</th><th>Phone</th><th>Service</th><th>Address</th><th>Created</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<script>
+/* ---------- Tabs ---------- */
+document.querySelectorAll('.tabs button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('section.card').forEach(s => s.style.display = 'none');
+    document.getElementById(btn.dataset.tab).style.display = 'block';
+  });
+});
+
+/* ---------- API Helpers ---------- */
+const api = {
+  products: {
+    list: () => fetch('/api/admin/products').then(r => r.json()),
+    create: (data) => fetch('/api/admin/products', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data) }).then(r => r.json()),
+    update: (id, data) => fetch(`/api/admin/products/${id}`, { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data) }).then(r => r.json()),
+    delete: (id) => fetch(`/api/admin/products/${id}`, { method: 'DELETE' }).then(r => r.json())
+  },
+  orders: {
+    list: () => fetch('/api/admin/orders').then(r => r.json()),
+    ship: (id, status) => fetch(`/api/admin/orders/${id}/shipping`, { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify({status}) }).then(r => r.json())
+  },
+  bookings: {
+    list: () => fetch('/api/admin/bookings').then(r => r.json())
+  }
+};
+
+/* ---------- PRODUCTS ---------- */
+const pf = document.getElementById('productForm');
+const pfTitle = document.getElementById('pfTitle');
+const pid = document.getElementById('pid');
+const pname = document.getElementById('pname');
+const pprice = document.getElementById('pprice');
+const pbrand = document.getElementById('pbrand');
+const pton = document.getElementById('pton');
+const pimg = document.getElementById('pimg');
+const productsTableBody = document.querySelector('#productsTable tbody');
+
+function renderProducts(rows) {
+  productsTableBody.innerHTML = '';
+  if (!rows.length) {
+    productsTableBody.innerHTML = `<tr><td colspan="7">No products found.</td></tr>`;
+    return;
+  }
+
+  rows.forEach(p => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${p.id}</td>
+      <td>${p.name}</td>
+      <td>₹${Number(p.price).toFixed(2)}</td>
+      <td>${p.brand || ''}</td>
+      <td>${p.ton || ''}</td>
+      <td style="max-width:220px; overflow-wrap:anywhere">${p.img || ''}</td>
+      <td>
+        <button class="btn-edit" data-id="${p.id}">Edit</button>
+        <button class="btn-del" data-id="${p.id}">Delete</button>
+      </td>
+    `;
+    productsTableBody.appendChild(tr);
+  });
+
+  productsTableBody.querySelectorAll('.btn-edit').forEach(btn => {
+    btn.onclick = () => {
+      const id = btn.dataset.id;
+      const row = [...btn.closest('tbody').children].find(r => r.firstElementChild.textContent == id).children;
+      pid.value = id;
+      pname.value = row[1].textContent;
+      pprice.value = row[2].textContent.replace('₹','');
+      pbrand.value = row[3].textContent;
+      pton.value = row[4].textContent;
+      pimg.value = row[5].textContent;
+      pfTitle.textContent = 'Edit Product';
+      window.scrollTo({top:0, behavior:'smooth'});
+    };
+  });
+
+  productsTableBody.querySelectorAll('.btn-del').forEach(btn => {
+    btn.onclick = async () => {
+      if (!confirm('Delete product #' + btn.dataset.id + '?')) return;
+      const res = await api.products.delete(btn.dataset.id);
+      alert(res.message || 'Deleted');
+      loadProducts();
+    };
+  });
+}
+
+async function loadProducts() {
+  try {
+    const rows = await api.products.list();
+    renderProducts(rows);
+  } catch (err) {
+    console.error(err);
+    productsTableBody.innerHTML = `<tr><td colspan="7">Failed to load products</td></tr>`;
+  }
+}
+
+pf.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const data = {
+    name: pname.value.trim(),
+    price: Number(pprice.value),
+    brand: pbrand.value.trim() || null,
+    ton: pton.value.trim() || null,
+    img: pimg.value.trim() || null
+  };
+  if (!data.name || isNaN(data.price)) { alert('Name and Price are required'); return; }
+
+  try {
+    if (pid.value) {
+      const res = await api.products.update(pid.value, data);
+      alert(res.message || 'Updated');
+    } else {
+      const res = await api.products.create(data);
+      alert(res.message || 'Created');
+    }
+    pid.value = '';
+    pfTitle.textContent = 'Add Product';
+    pf.reset();
+    loadProducts();
+  } catch (err) {
+    console.error(err);
+    alert('Save failed');
+  }
+});
+
+/* ---------- ORDERS ---------- */
+const ordersTableBody = document.querySelector('#ordersTable tbody');
+
+function getStatusBadge(status) {
+  const s = (status || 'Pending').toUpperCase();
+  let color = s === 'PENDING' ? 'orange' : s === 'SHIPPED' ? 'blue' : s === 'DELIVERED' ? 'green' : 'gray';
+  return `<span style="color:white; background-color:${color}; padding:2px 6px; border-radius:4px; font-weight:bold;">${s}</span>`;
+}
+
+async function loadOrders() {
+  try {
+    const rows = await api.orders.list(); // fetch orders from backend
+    if (!rows || !rows.length) {
+      ordersTableBody.innerHTML = `<tr><td colspan="6">No orders found.</td></tr>`;
+      return;
+    }
+
+    // Group orders by order_id
+    const ordersMap = {};
+    rows.forEach(item => {
+      if (!ordersMap[item.order_id]) ordersMap[item.order_id] = { ...item, items: [] };
+      ordersMap[item.order_id].items.push(item);
+    });
+
+    ordersTableBody.innerHTML = '';
+
+    Object.values(ordersMap).forEach(order => {
+      const itemsHtml = order.items
+        .map(i => `<strong>${i.product_name}</strong> x ${i.quantity} = ₹${i.total_price}`)
+        .join('<br>');
+
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${order.order_id}</td>
+        <td>${order.user_name}</td>
+        <td style="max-width:350px; overflow-wrap:anywhere; line-height:1.4;">${itemsHtml}</td>
+        <td>${getStatusBadge(order.status)}</td>
+        <td>${order.created_at}</td>
+        <td><button class="btn-ship" data-id="${order.order_id}">Update Status</button></td>
+      `;
+      ordersTableBody.appendChild(tr);
+    });
+
+    // Status update buttons
+    ordersTableBody.querySelectorAll('.btn-ship').forEach(btn => {
+      btn.onclick = async () => {
+        const status = prompt('Enter new status (Pending / Shipped / Delivered):', 'Shipped');
+        if (!status) return;
+        await api.orders.ship(btn.dataset.id, status.toUpperCase());
+        loadOrders(); // reload after update
+      };
+    });
+
+  } catch (err) {
+    console.error(err);
+    ordersTableBody.innerHTML = `<tr><td colspan="6">Failed to load orders</td></tr>`;
+  }
+}
+
+/* ---------- BOOKINGS ---------- */
+const bookingsTableBody = document.querySelector('#bookingsTable tbody');
+
+function renderBookings(rows) {
+  bookingsTableBody.innerHTML = '';
+  if (!rows.length) {
+    bookingsTableBody.innerHTML = `<tr><td colspan="6">No bookings found.</td></tr>`;
+    return;
+  }
+  rows.forEach(b => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${b.id}</td>
+      <td>${b.name}</td>
+      <td>${b.phone}</td>
+      <td>${b.service}</td>
+      <td>${b.address}</td>
+      <td>${b.created_at || ''}</td>
+    `;
+    bookingsTableBody.appendChild(tr);
+  });
+}
+
+async function loadBookings() {
+  try {
+    const rows = await api.bookings.list();
+    renderBookings(rows);
+  } catch (err) {
+    console.error(err);
+    bookingsTableBody.innerHTML = `<tr><td colspan="6">Failed to load bookings</td></tr>`;
+  }
+}
+
+/* ---------- INIT ---------- */
+loadProducts();
+loadOrders();
+loadBookings();
+</script>
+
+
+
+</body>
+</html>
