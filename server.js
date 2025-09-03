@@ -133,10 +133,17 @@ app.get("/api/admin/products", async (_req, res) => {
   }
 });
 
+// ✅ FIXED ADD PRODUCT ROUTE
 app.post("/api/admin/products", async (req, res) => {
-  const { name, price, brand, ton, img } = req.body;
+  let { name, price, brand, ton, img } = req.body;
+
   if (!name || !price)
     return res.status(400).json({ error: "Name and Price are required" });
+
+  // Ensure safe defaults
+  brand = brand || "";
+  ton = ton || "";
+  img = img || "";
 
   try {
     const [result] = await pool.query(
@@ -156,7 +163,7 @@ app.put("/api/admin/products/:id", async (req, res) => {
   try {
     await pool.query(
       "UPDATE products SET name=?, price=?, brand=?, ton=?, img=? WHERE id=?",
-      [name, price, brand, ton, img, id]
+      [name, price, brand || "", ton || "", img || "", id]
     );
     res.json({ message: "✅ Product updated" });
   } catch (e) {
@@ -174,8 +181,20 @@ app.delete("/api/admin/products/:id", async (req, res) => {
 });
 
 
+// Public products API (customers can see products here)
+app.get("/api/products", async (_req, res) => {
+  try {
+    const [rows] = await pool.query("SELECT * FROM products ORDER BY id DESC");
+    res.json(rows);
+  } catch (err) {
+    console.error("Fetch products error:", err);
+    res.status(500).json({ error: "Database error" });
+  }
+});
 
-// Create a new order with items
+
+
+/* ====== ORDERS ====== */
 app.post("/api/orders", async (req, res) => {
   const { user_id, items } = req.body; // items = [{product_id, quantity, unit_price}]
 
@@ -187,19 +206,21 @@ app.post("/api/orders", async (req, res) => {
   try {
     await conn.beginTransaction();
 
-    // Calculate total
-    const total_amount = items.reduce((sum, item) => sum + item.quantity * item.unit_price, 0);
+    const total_amount = items.reduce(
+      (sum, item) => sum + item.quantity * item.unit_price,
+      0
+    );
 
-    // Insert order
     const [orderResult] = await conn.query(
       "INSERT INTO orders (user_id, total_amount, status) VALUES (?, ?, ?)",
       [user_id, total_amount, "Pending"]
     );
     const orderId = orderResult.insertId;
 
-    // Insert each order item
     for (const item of items) {
-      const [product] = await conn.query("SELECT name FROM products WHERE id=?", [item.product_id]);
+      const [product] = await conn.query("SELECT name FROM products WHERE id=?", [
+        item.product_id,
+      ]);
       const product_name = product[0].name;
 
       await conn.query(
@@ -226,20 +247,6 @@ app.post("/api/orders", async (req, res) => {
     conn.release();
   }
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 /* ====== BOOKINGS ====== */
 app.post("/api/bookings", async (req, res) => {
