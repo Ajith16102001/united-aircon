@@ -229,65 +229,6 @@ app.post("/api/orders", async (req, res) => {
 
 
 
-const express = require('express');
-const mysql = require('mysql');
-const app = express();
-
-app.use(express.json()); // to parse JSON request bodies
-
-// ----------------- MySQL Connection -----------------
-const db = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: '12345',
-  database: 'ac_store'
-});
-
-db.connect(err => {
-  if (err) throw err;
-  console.log('MySQL connected');
-});
-
-// ----------------- Your Routes -----------------
-
-// Products routes here (if any)
-
-// ------ Paste the Admin Orders Route Here ------
-app.get('/api/admin/orders', (req, res) => {
-  const sql = `
-    SELECT 
-      o.id AS order_id,
-      o.user_name,
-      o.status,
-      o.created_at,
-      p.name AS product_name,
-      oi.quantity,
-      oi.total_price
-    FROM orders o
-    JOIN order_items oi ON oi.order_id = o.id
-    JOIN products p ON p.id = oi.product_id
-    ORDER BY o.id DESC
-  `;
-  db.query(sql, (err, results) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json(results);
-  });
-});
-
-// Other routes, e.g., update shipping status
-app.put('/api/admin/orders/:id/shipping', (req, res) => {
-  const { status } = req.body;
-  const { id } = req.params;
-  db.query(`UPDATE orders SET status = ? WHERE id = ?`, [status, id], (err) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json({ message: 'Status updated' });
-  });
-});
-
-// ----------------- Start Server -----------------
-app.listen(3000, () => {
-  console.log('Server running on port 3000');
-});
 
 
 
@@ -295,20 +236,8 @@ app.listen(3000, () => {
 
 
 
-// Update order status (Admin)
-app.put("/api/admin/orders/:id/shipping", async (req, res) => {
-  const { id } = req.params;
-  const { status } = req.body;
-  if (!status) return res.status(400).json({ error: "Status required" });
 
-  try {
-    await pool.query("UPDATE orders SET status=? WHERE id=?", [status, id]);
-    res.json({ success: true, message: `Order #${id} status updated to ${status}` });
-  } catch (err) {
-    console.error("Shipping update error:", err);
-    res.status(500).json({ error: "Database error" });
-  }
-});
+
 
 
 
